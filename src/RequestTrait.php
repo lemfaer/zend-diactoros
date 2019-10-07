@@ -5,22 +5,11 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-
-use function array_keys;
-use function get_class;
-use function gettype;
-use function is_object;
-use function is_string;
-use function preg_match;
-use function sprintf;
-use function strtolower;
 
 /**
  * Trait with common request behaviors.
@@ -32,26 +21,24 @@ use function strtolower;
  * between both client-side and server-side requests, and each can then
  * use the headers functionality required by their implementations.
  */
-trait RequestTrait
+class RequestTrait extends MessageTrait
 {
-    use MessageTrait;
-
     /**
      * @var string
      */
-    private $method = 'GET';
+    protected $method = 'GET';
 
     /**
      * The request-target, if it has been provided or calculated.
      *
      * @var null|string
      */
-    private $requestTarget;
+    protected $requestTarget;
 
     /**
      * @var UriInterface
      */
-    private $uri;
+    protected $uri;
 
     /**
      * Initialize request state.
@@ -64,12 +51,12 @@ trait RequestTrait
      * @param array $headers Headers for the message, if any.
      * @throws Exception\InvalidArgumentException for any invalid value.
      */
-    private function initialize(
+    protected function initialize(
         $uri = null,
-        string $method = null,
+        $method = null,
         $body = 'php://memory',
-        array $headers = []
-    ) : void {
+        array $headers = array()
+    ) {
         if ($method !== null) {
             $this->setMethod($method);
         }
@@ -83,7 +70,7 @@ trait RequestTrait
         // Host header is provided
         if (! $this->hasHeader('Host') && $this->uri->getHost()) {
             $this->headerNames['host'] = 'Host';
-            $this->headers['Host'] = [$this->getHostFromUri()];
+            $this->headers['Host'] = array($this->getHostFromUri());
         }
     }
 
@@ -102,7 +89,7 @@ trait RequestTrait
      * @param null|string|UriInterface $uri
      * @throws Exception\InvalidArgumentException
      */
-    private function createUri($uri) : UriInterface
+    protected function createUri($uri)
     {
         if ($uri instanceof UriInterface) {
             return $uri;
@@ -132,7 +119,7 @@ trait RequestTrait
      * If no URI is available, and no request-target has been specifically
      * provided, this method MUST return the string "/".
      */
-    public function getRequestTarget() : string
+    public function getRequestTarget()
     {
         if (null !== $this->requestTarget) {
             return $this->requestTarget;
@@ -167,7 +154,7 @@ trait RequestTrait
      * @param string $requestTarget
      * @throws Exception\InvalidArgumentException if the request target is invalid.
      */
-    public function withRequestTarget($requestTarget) : RequestInterface
+    public function withRequestTarget($requestTarget)
     {
         if (preg_match('#\s#', $requestTarget)) {
             throw new Exception\InvalidArgumentException(
@@ -185,7 +172,7 @@ trait RequestTrait
      *
      * @return string Returns the request method.
      */
-    public function getMethod() : string
+    public function getMethod()
     {
         return $this->method;
     }
@@ -204,7 +191,7 @@ trait RequestTrait
      * @param string $method Case-insensitive method.
      * @throws Exception\InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod($method) : RequestInterface
+    public function withMethod($method)
     {
         $new = clone $this;
         $new->setMethod($method);
@@ -220,7 +207,7 @@ trait RequestTrait
      * @return UriInterface Returns a UriInterface instance
      *     representing the URI of the request, if any.
      */
-    public function getUri() : UriInterface
+    public function getUri()
     {
         return $this->uri;
     }
@@ -249,7 +236,7 @@ trait RequestTrait
      * @param UriInterface $uri New request URI to use.
      * @param bool $preserveHost Preserve the original state of the Host header.
      */
-    public function withUri(UriInterface $uri, $preserveHost = false) : RequestInterface
+    public function withUri(UriInterface $uri, $preserveHost = false)
     {
         $new = clone $this;
         $new->uri = $uri;
@@ -278,7 +265,7 @@ trait RequestTrait
             }
         }
 
-        $new->headers['Host'] = [$host];
+        $new->headers['Host'] = array($host);
 
         return $new;
     }
@@ -289,7 +276,7 @@ trait RequestTrait
      * @param string $method
      * @throws Exception\InvalidArgumentException on invalid HTTP method.
      */
-    private function setMethod($method) : void
+    protected function setMethod($method)
     {
         if (! is_string($method)) {
             throw new Exception\InvalidArgumentException(sprintf(
@@ -310,7 +297,7 @@ trait RequestTrait
     /**
      * Retrieve the host from the URI instance
      */
-    private function getHostFromUri() : string
+    protected function getHostFromUri()
     {
         $host  = $this->uri->getHost();
         $host .= $this->uri->getPort() ? ':' . $this->uri->getPort() : '';

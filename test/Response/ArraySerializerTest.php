@@ -5,11 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\Response;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use UnexpectedValueException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\ArraySerializer;
@@ -42,7 +40,7 @@ class ArraySerializerTest extends TestCase
         $serializedRequest = $this->createSerializedResponse();
         unset($serializedRequest['body']);
 
-        $this->expectException(UnexpectedValueException::class);
+        $this->setExpectedException("UnexpectedValueException");
 
         ArraySerializer::fromArray($serializedRequest);
     }
@@ -52,7 +50,8 @@ class ArraySerializerTest extends TestCase
         $stream = new Stream('php://memory', 'wb+');
         $stream->write('{"test":"value"}');
 
-        return (new Response())
+        $response = new Response();
+        return $response
             ->withStatus(201, 'Custom')
             ->withProtocolVersion('1.1')
             ->withAddedHeader('Accept', 'application/json')
@@ -63,20 +62,20 @@ class ArraySerializerTest extends TestCase
 
     private function createSerializedResponse()
     {
-        return [
+        return array(
             'status_code' => 201,
             'reason_phrase' => 'Custom',
             'protocol_version' => '1.1',
-            'headers' => [
-                'Accept' => [
+            'headers' => array(
+                'Accept' => array(
                     'application/json',
-                ],
-                'X-Foo-Bar' => [
+                ),
+                'X-Foo-Bar' => array(
                     'Baz',
                     'Bat'
-                ],
-            ],
+                ),
+            ),
             'body' => '{"test":"value"}',
-        ];
+        );
     }
 }

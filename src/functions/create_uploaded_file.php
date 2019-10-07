@@ -5,8 +5,6 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 /**
@@ -16,7 +14,7 @@ namespace Zend\Diactoros;
  * @throws Exception\InvalidArgumentException if one or more of the tmp_name,
  *     size, or error keys are missing from $spec.
  */
-function createUploadedFile(array $spec) : UploadedFile
+function createUploadedFile(array $spec)
 {
     if (! isset($spec['tmp_name'])
         || ! isset($spec['size'])
@@ -33,7 +31,7 @@ function createUploadedFile(array $spec) : UploadedFile
         $spec['tmp_name'],
         $spec['size'],
         $spec['error'],
-        $spec['name'] ?? null,
-        $spec['type'] ?? null
+        isset($spec['name']) ? $spec['name'] : null,
+        isset($spec['type']) ? $spec['type'] : null
     );
 }

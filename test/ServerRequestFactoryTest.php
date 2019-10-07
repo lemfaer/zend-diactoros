@@ -5,11 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 use UnexpectedValueException;
@@ -18,26 +16,20 @@ use Zend\Diactoros\ServerRequestFactory;
 use Zend\Diactoros\UploadedFile;
 use Zend\Diactoros\Uri;
 
-use function Zend\Diactoros\marshalHeadersFromSapi;
-use function Zend\Diactoros\marshalProtocolVersionFromSapi;
-use function Zend\Diactoros\marshalUriFromSapi;
-use function Zend\Diactoros\normalizeServer;
-use function Zend\Diactoros\normalizeUploadedFiles;
-
 class ServerRequestFactoryTest extends TestCase
 {
     public function testReturnsServerValueUnchangedIfHttpAuthorizationHeaderIsPresent()
     {
-        $server = [
+        $server = array(
             'HTTP_AUTHORIZATION' => 'token',
             'HTTP_X_Foo' => 'bar',
-        ];
-        $this->assertSame($server, normalizeServer($server));
+        );
+        $this->assertSame($server, \Zend\Diactoros\normalizeServer($server));
     }
 
     public function testMarshalsExpectedHeadersFromServerArray()
     {
-        $server = [
+        $server = array(
             'HTTP_COOKIE' => 'COOKIE',
             'HTTP_AUTHORIZATION' => 'token',
             'HTTP_CONTENT_TYPE' => 'application/json',
@@ -45,9 +37,9 @@ class ServerRequestFactoryTest extends TestCase
             'HTTP_X_FOO_BAR' => 'FOOBAR',
             'CONTENT_MD5' => 'CONTENT-MD5',
             'CONTENT_LENGTH' => 'UNSPECIFIED',
-        ];
+        );
 
-        $expected = [
+        $expected = array(
             'cookie' => 'COOKIE',
             'authorization' => 'token',
             'content-type' => 'application/json',
@@ -55,84 +47,84 @@ class ServerRequestFactoryTest extends TestCase
             'x-foo-bar' => 'FOOBAR',
             'content-md5' => 'CONTENT-MD5',
             'content-length' => 'UNSPECIFIED',
-        ];
+        );
 
-        $this->assertSame($expected, marshalHeadersFromSapi($server));
+        $this->assertSame($expected, \Zend\Diactoros\marshalHeadersFromSapi($server));
     }
 
     public function testMarshalInvalidHeadersStrippedFromServerArray()
     {
-        $server = [
+        $server = array(
             'COOKIE' => 'COOKIE',
             'HTTP_AUTHORIZATION' => 'token',
             'MD5' => 'CONTENT-MD5',
             'CONTENT_LENGTH' => 'UNSPECIFIED',
-        ];
+        );
 
         //Headers that don't begin with HTTP_ or CONTENT_ will not be returned
-        $expected = [
+        $expected = array(
             'authorization' => 'token',
             'content-length' => 'UNSPECIFIED',
-        ];
-        $this->assertSame($expected, marshalHeadersFromSapi($server));
+        );
+        $this->assertSame($expected, \Zend\Diactoros\marshalHeadersFromSapi($server));
     }
 
     public function testMarshalsVariablesPrefixedByApacheFromServerArray()
     {
         // Non-prefixed versions will be preferred
-        $server = [
+        $server = array(
             'HTTP_X_FOO_BAR' => 'nonprefixed',
             'REDIRECT_HTTP_AUTHORIZATION' => 'token',
             'REDIRECT_HTTP_X_FOO_BAR' => 'prefixed',
-        ];
+        );
 
-        $expected = [
+        $expected = array(
             'authorization' => 'token',
             'x-foo-bar' => 'nonprefixed',
-        ];
+        );
 
-        $this->assertEquals($expected, marshalHeadersFromSapi($server));
+        $this->assertEquals($expected, \Zend\Diactoros\marshalHeadersFromSapi($server));
     }
 
     public function testMarshalRequestUriUsesIISUnencodedUrlValueIfPresentAndUrlWasRewritten()
     {
-        $server = [
+        $server = array(
             'IIS_WasUrlRewritten' => '1',
             'UNENCODED_URL' => '/foo/bar',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, []);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, array());
 
         $this->assertSame($server['UNENCODED_URL'], $uri->getPath());
     }
 
     public function testMarshalRequestUriStripsSchemeHostAndPortInformationWhenPresent()
     {
-        $server = [
+        $server = array(
             'REQUEST_URI' => 'http://example.com:8000/foo/bar',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, []);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, array());
 
         $this->assertSame('/foo/bar', $uri->getPath());
     }
 
     public function testMarshalRequestUriUsesOrigPathInfoIfPresent()
     {
-        $server = [
+        $server = array(
             'ORIG_PATH_INFO' => '/foo/bar',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, []);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, array());
 
         $this->assertSame('/foo/bar', $uri->getPath());
     }
 
     public function testMarshalRequestUriFallsBackToRoot()
     {
-        $server = [];
+        $server = array();
 
-        $uri = marshalUriFromSapi($server, []);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, array());
 
         $this->assertSame('/', $uri->getPath());
     }
@@ -144,7 +136,7 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withMethod('GET');
         $request = $request->withHeader('Host', 'example.com');
 
-        $uri = marshalUriFromSapi([], $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi(array(), $request->getHeaders());
 
         $this->assertSame('example.com', $uri->getHost());
         $this->assertNull($uri->getPort());
@@ -157,7 +149,7 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withMethod('GET');
         $request = $request->withHeader('Host', 'example.com:8000');
 
-        $uri = marshalUriFromSapi([], $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi(array(), $request->getHeaders());
 
         $this->assertSame('example.com', $uri->getHost());
         $this->assertSame(8000, $uri->getPort());
@@ -168,7 +160,7 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri());
 
-        $uri = marshalUriFromSapi([], $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi(array(), $request->getHeaders());
 
         $this->assertSame('', $uri->getHost());
         $this->assertNull($uri->getPort());
@@ -179,11 +171,11 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri('http://example.com/'));
 
-        $server  = [
+        $server = array(
             'SERVER_NAME' => 'example.com',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
         $this->assertSame('example.com', $uri->getHost());
         $this->assertNull($uri->getPort());
@@ -194,12 +186,12 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri());
 
-        $server  = [
+        $server  = array(
             'SERVER_NAME' => 'example.com',
             'SERVER_PORT' => 8000,
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
         $this->assertSame('example.com', $uri->getHost());
         $this->assertSame(8000, $uri->getPort());
@@ -210,12 +202,12 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri('http://example.com/'));
 
-        $server  = [
+        $server  = array(
             'SERVER_ADDR' => '127.0.0.1',
             'SERVER_NAME' => 'example.com',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
         $this->assertSame('example.com', $uri->getHost());
     }
@@ -225,13 +217,13 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri());
 
-        $server  = [
+        $server  = array(
             'SERVER_ADDR' => 'FE80::0202:B3FF:FE1E:8329',
             'SERVER_NAME' => '[FE80::0202:B3FF:FE1E:8329]',
             'SERVER_PORT' => 8000,
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
         $this->assertSame(strtolower('[FE80::0202:B3FF:FE1E:8329]'), $uri->getHost());
         $this->assertSame(8000, $uri->getPort());
@@ -242,12 +234,12 @@ class ServerRequestFactoryTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withUri(new Uri());
 
-        $server  = [
+        $server  = array(
             'SERVER_ADDR' => 'FE80::0202:B3FF:FE1E:8329',
             'SERVER_NAME' => '[FE80::0202:B3FF:FE1E:8329:80]',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
         $this->assertSame(strtolower('[FE80::0202:B3FF:FE1E:8329]'), $uri->getHost());
         $this->assertNull($uri->getPort());
@@ -258,10 +250,10 @@ class ServerRequestFactoryTest extends TestCase
      */
     public function httpsParamProvider()
     {
-        return [
-            'lowercase' => ['https'],
-            'uppercase' => ['HTTPS'],
-        ];
+        return array(
+            'lowercase' => array('https'),
+            'uppercase' => array('HTTPS'),
+        );
     }
 
     /**
@@ -274,13 +266,13 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withUri(new Uri('http://example.com/'));
         $request = $request->withHeader('Host', 'example.com');
 
-        $server  = [
+        $server  = array(
             $param => true,
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('https', $uri->getScheme());
     }
 
@@ -289,14 +281,17 @@ class ServerRequestFactoryTest extends TestCase
      */
     public function httpsDisableParamProvider()
     {
+        $all = array();
         foreach ($this->httpsParamProvider() as $key => $data) {
             $param = array_shift($data);
-            foreach (['lowercase-off', 'uppercase-off'] as $type) {
+            foreach (array('lowercase-off', 'uppercase-off') as $type) {
                 $key = sprintf('%s-%s', $key, $type);
                 $value = false !== strpos($type, 'lowercase') ? 'off' : 'OFF';
-                yield $key => [$param, $value];
+                $all[$key] = array($param, $value);
             }
         }
+
+        return $all;
     }
 
     /**
@@ -310,13 +305,13 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withUri(new Uri('http://example.com/'));
         $request = $request->withHeader('Host', 'example.com');
 
-        $server  = [
+        $server  = array(
             $param => $value,
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('http', $uri->getScheme());
     }
 
@@ -331,11 +326,11 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withHeader('Host', 'example.com');
         $request = $request->withHeader('X-Forwarded-Proto', $xForwardedProto);
 
-        $server  = [];
+        $server  = array();
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('https', $uri->getScheme());
     }
 
@@ -345,13 +340,13 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withUri(new Uri('http://example.com/'));
         $request = $request->withHeader('Host', 'example.com');
 
-        $server = [
+        $server = array(
             'REQUEST_URI' => '/foo/bar?foo=bar',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('/foo/bar', $uri->getPath());
     }
 
@@ -361,14 +356,14 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withUri(new Uri('http://example.com/'));
         $request = $request->withHeader('Host', 'example.com');
 
-        $server = [
+        $server = array(
             'REQUEST_URI' => '/foo/bar?foo=bar',
             'QUERY_STRING' => 'bar=baz',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('bar=baz', $uri->getQuery());
     }
 
@@ -378,47 +373,49 @@ class ServerRequestFactoryTest extends TestCase
         $request = $request->withUri(new Uri('http://example.com/'));
         $request = $request->withHeader('Host', 'example.com');
 
-        $server = [
+        $server = array(
             'REQUEST_URI' => '/foo/bar#foo',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $request->getHeaders());
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $request->getHeaders());
 
-        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertInstanceOf("Zend\Diactoros\Uri", $uri);
         $this->assertSame('foo', $uri->getFragment());
     }
 
     public function testCanCreateServerRequestViaFromGlobalsMethod()
     {
-        $server = [
+        $server = array(
             'SERVER_PROTOCOL' => '1.1',
             'HTTP_HOST' => 'example.com',
             'HTTP_ACCEPT' => 'application/json',
             'REQUEST_METHOD' => 'POST',
             'REQUEST_URI' => '/foo/bar',
             'QUERY_STRING' => 'bar=baz',
-        ];
+        );
 
-        $cookies = $query = $body = $files = [
+        $cookies = $query = $body = $files = array(
             'bar' => 'baz',
-        ];
+        );
 
         $cookies['cookies'] = true;
         $query['query']     = true;
         $body['body']       = true;
-        $files              = [ 'files' => [
-            'tmp_name' => 'php://temp',
-            'size'     => 0,
-            'error'    => 0,
-            'name'     => 'foo.bar',
-            'type'     => 'text/plain',
-        ]];
-        $expectedFiles = [
+        $files = array(
+            'files' => array(
+                'tmp_name' => 'php://temp',
+                'size'     => 0,
+                'error'    => 0,
+                'name'     => 'foo.bar',
+                'type'     => 'text/plain',
+            )
+        );
+        $expectedFiles = array(
             'files' => new UploadedFile('php://temp', 0, 0, 'foo.bar', 'text/plain')
-        ];
+        );
 
         $request = ServerRequestFactory::fromGlobals($server, $query, $body, $cookies, $files);
-        $this->assertInstanceOf(ServerRequest::class, $request);
+        $this->assertInstanceOf("Zend\Diactoros\ServerRequest", $request);
         $this->assertSame($cookies, $request->getCookieParams());
         $this->assertSame($query, $request->getQueryParams());
         $this->assertSame($body, $request->getParsedBody());
@@ -429,13 +426,13 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testFromGlobalsUsesCookieHeaderInsteadOfCookieSuperGlobal()
     {
-        $_COOKIE = [
+        $_COOKIE = array(
             'foo_bar' => 'bat',
-        ];
+        );
         $_SERVER['HTTP_COOKIE'] = 'foo_bar=baz';
 
         $request = ServerRequestFactory::fromGlobals();
-        $this->assertSame(['foo_bar' => 'baz'], $request->getCookieParams());
+        $this->assertSame(array('foo_bar' => 'baz'), $request->getCookieParams());
     }
 
     /**
@@ -473,42 +470,42 @@ class ServerRequestFactoryTest extends TestCase
      */
     public function testFromGlobalsUsesCookieSuperGlobalWhenCookieHeaderIsNotSet()
     {
-        $_COOKIE = [
+        $_COOKIE = array(
             'foo_bar' => 'bat',
-        ];
+        );
 
         $request = ServerRequestFactory::fromGlobals();
-        $this->assertSame(['foo_bar' => 'bat'], $request->getCookieParams());
+        $this->assertSame(array('foo_bar' => 'bat'), $request->getCookieParams());
     }
 
     public function cookieHeaderValues()
     {
-        return [
-            'ows-without-fold' => [
+        return array(
+            'ows-without-fold' => array(
                 "\tfoo=bar ",
-                ['foo' => 'bar'],
-            ],
-            'url-encoded-value' => [
+                array('foo' => 'bar'),
+            ),
+            'url-encoded-value' => array(
                 'foo=bar%3B+',
-                ['foo' => 'bar; '],
-            ],
-            'double-quoted-value' => [
+                array('foo' => 'bar; '),
+            ),
+            'double-quoted-value' => array(
                 'foo="bar"',
-                ['foo' => 'bar'],
-            ],
-            'multiple-pairs' => [
+                array('foo' => 'bar'),
+            ),
+            'multiple-pairs' => array(
                 'foo=bar; baz="bat"; bau=bai',
-                ['foo' => 'bar', 'baz' => 'bat', 'bau' => 'bai'],
-            ],
-            'same-name-pairs' => [
+                array('foo' => 'bar', 'baz' => 'bat', 'bau' => 'bai'),
+            ),
+            'same-name-pairs' => array(
                 'foo=bar; foo="bat"',
-                ['foo' => 'bat'],
-            ],
-            'period-in-name' => [
+                array('foo' => 'bat'),
+            ),
+            'period-in-name' => array(
                 'foo.bar=baz',
-                ['foo.bar' => 'baz'],
-            ],
-        ];
+                array('foo.bar' => 'baz'),
+            ),
+        );
     }
 
     /**
@@ -526,8 +523,8 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testNormalizeServerUsesMixedCaseAuthorizationHeaderFromApacheWhenPresent()
     {
-        $server = normalizeServer([], function () {
-            return ['Authorization' => 'foobar'];
+        $server = \Zend\Diactoros\normalizeServer(array(), function () {
+            return array('Authorization' => 'foobar');
         });
 
         $this->assertArrayHasKey('HTTP_AUTHORIZATION', $server);
@@ -536,8 +533,8 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testNormalizeServerUsesLowerCaseAuthorizationHeaderFromApacheWhenPresent()
     {
-        $server = normalizeServer([], function () {
-            return ['authorization' => 'foobar'];
+        $server = \Zend\Diactoros\normalizeServer(array(), function () {
+            return array('authorization' => 'foobar');
         });
 
         $this->assertArrayHasKey('HTTP_AUTHORIZATION', $server);
@@ -546,10 +543,10 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testNormalizeServerReturnsArrayUnalteredIfApacheHeadersDoNotContainAuthorization()
     {
-        $expected = ['FOO_BAR' => 'BAZ'];
+        $expected = array('FOO_BAR' => 'BAZ');
 
-        $server = normalizeServer($expected, function () {
-            return [];
+        $server = \Zend\Diactoros\normalizeServer($expected, function () {
+            return array();
         });
 
         $this->assertSame($expected, $server);
@@ -561,28 +558,28 @@ class ServerRequestFactoryTest extends TestCase
      */
     public function testNormalizeFilesReturnsOnlyActualFilesWhenOriginalFilesContainsNestedAssociativeArrays()
     {
-        $files = [ 'fooFiles' => [
-            'tmp_name' => ['file' => 'php://temp'],
-            'size'     => ['file' => 0],
-            'error'    => ['file' => 0],
-            'name'     => ['file' => 'foo.bar'],
-            'type'     => ['file' => 'text/plain'],
-        ]];
+        $files = array('fooFiles' => array(
+            'tmp_name' => array('file' => 'php://temp'),
+            'size'     => array('file' => 0),
+            'error'    => array('file' => 0),
+            'name'     => array('file' => 'foo.bar'),
+            'type'     => array('file' => 'text/plain'),
+        ));
 
-        $normalizedFiles = normalizeUploadedFiles($files);
+        $normalizedFiles = \Zend\Diactoros\normalizeUploadedFiles($files);
 
         $this->assertCount(1, $normalizedFiles['fooFiles']);
     }
 
     public function testMarshalProtocolVersionRisesExceptionIfVersionIsNotRecognized()
     {
-        $this->expectException(UnexpectedValueException::class);
-        marshalProtocolVersionFromSapi(['SERVER_PROTOCOL' => 'dadsa/1.0']);
+        $this->setExpectedException("UnexpectedValueException");
+        \Zend\Diactoros\marshalProtocolVersionFromSapi(array('SERVER_PROTOCOL' => 'dadsa/1.0'));
     }
 
     public function testMarshalProtocolReturnsDefaultValueIfHeaderIsNotPresent()
     {
-        $version = marshalProtocolVersionFromSapi([]);
+        $version = \Zend\Diactoros\marshalProtocolVersionFromSapi(array());
         $this->assertSame('1.1', $version);
     }
 
@@ -591,29 +588,29 @@ class ServerRequestFactoryTest extends TestCase
      */
     public function testMarshalProtocolVersionReturnsHttpVersions($protocol, $expected)
     {
-        $version = marshalProtocolVersionFromSapi(['SERVER_PROTOCOL' => $protocol]);
+        $version = \Zend\Diactoros\marshalProtocolVersionFromSapi(array('SERVER_PROTOCOL' => $protocol));
         $this->assertSame($expected, $version);
     }
 
     public function marshalProtocolVersionProvider()
     {
-        return [
-            'HTTP/1.0' => ['HTTP/1.0', '1.0'],
-            'HTTP/1.1' => ['HTTP/1.1', '1.1'],
-            'HTTP/2'   => ['HTTP/2', '2'],
-        ];
+        return array(
+            'HTTP/1.0' => array('HTTP/1.0', '1.0'),
+            'HTTP/1.1' => array('HTTP/1.1', '1.1'),
+            'HTTP/2'   => array('HTTP/2', '2'),
+        );
     }
 
     public function testMarshalRequestUriPrefersRequestUriServerParamWhenXOriginalUrlButNoXRewriteUrlPresent()
     {
-        $headers = [
+        $headers = array(
             'X-Original-URL' => '/hijack-attempt',
-        ];
-        $server = [
+        );
+        $server = array(
             'REQUEST_URI' => 'https://example.com/requested/path',
-        ];
+        );
 
-        $uri = marshalUriFromSapi($server, $headers);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
         $this->assertSame('/requested/path', $uri->getPath());
     }
 

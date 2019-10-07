@@ -5,18 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-
-use function gettype;
-use function is_float;
-use function is_numeric;
-use function is_scalar;
-use function sprintf;
 
 /**
  * HTTP response encapsulation.
@@ -25,10 +17,8 @@ use function sprintf;
  * implemented such that they retain the internal state of the current
  * message and return a new instance that contains the changed state.
  */
-class Response implements ResponseInterface
+class Response extends MessageTrait implements ResponseInterface
 {
-    use MessageTrait;
-
     const MIN_STATUS_CODE_VALUE = 100;
     const MAX_STATUS_CODE_VALUE = 599;
 
@@ -37,7 +27,7 @@ class Response implements ResponseInterface
      *
      * @var array
      */
-    private $phrases = [
+    private $phrases = array(
         // INFORMATIONAL CODES
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -109,7 +99,7 @@ class Response implements ResponseInterface
         510 => 'Not Extended',
         511 => 'Network Authentication Required',
         599 => 'Network Connect Timeout Error',
-    ];
+    );
 
     /**
      * @var string
@@ -127,7 +117,7 @@ class Response implements ResponseInterface
      * @param array $headers Headers for the response, if any.
      * @throws Exception\InvalidArgumentException on any invalid element.
      */
-    public function __construct($body = 'php://memory', int $status = 200, array $headers = [])
+    public function __construct($body = 'php://memory', $status = 200, array $headers = array())
     {
         $this->setStatusCode($status);
         $this->stream = $this->getStream($body, 'wb+');
@@ -137,7 +127,7 @@ class Response implements ResponseInterface
     /**
      * {@inheritdoc}
      */
-    public function getStatusCode() : int
+    public function getStatusCode()
     {
         return $this->statusCode;
     }
@@ -145,7 +135,7 @@ class Response implements ResponseInterface
     /**
      * {@inheritdoc}
      */
-    public function getReasonPhrase() : string
+    public function getReasonPhrase()
     {
         return $this->reasonPhrase;
     }
@@ -153,7 +143,7 @@ class Response implements ResponseInterface
     /**
      * {@inheritdoc}
      */
-    public function withStatus($code, $reasonPhrase = '') : Response
+    public function withStatus($code, $reasonPhrase = '')
     {
         $new = clone $this;
         $new->setStatusCode($code, $reasonPhrase);
@@ -167,7 +157,7 @@ class Response implements ResponseInterface
      * @param string $reasonPhrase
      * @throws Exception\InvalidArgumentException on an invalid status code.
      */
-    private function setStatusCode($code, $reasonPhrase = '') : void
+    private function setStatusCode($code, $reasonPhrase = '')
     {
         if (! is_numeric($code)
             || is_float($code)

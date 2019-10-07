@@ -5,13 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\UploadedFileInterface;
-
-use function is_array;
 
 /**
  * Normalize uploaded files
@@ -22,7 +18,7 @@ use function is_array;
  * @return UploadedFileInterface[]
  * @throws Exception\InvalidArgumentException for unrecognized values
  */
-function normalizeUploadedFiles(array $files) : array
+function normalizeUploadedFiles(array $files)
 {
     /**
      * Traverse a nested tree of uploaded file specifications.
@@ -40,8 +36,8 @@ function normalizeUploadedFiles(array $files) : array
         array $errorTree,
         array $nameTree = null,
         array $typeTree = null
-    ) use (&$recursiveNormalize) : array {
-        $normalized = [];
+    ) use (&$recursiveNormalize) {
+        $normalized = array();
         foreach ($tmpNameTree as $key => $value) {
             if (is_array($value)) {
                 // Traverse
@@ -49,18 +45,18 @@ function normalizeUploadedFiles(array $files) : array
                     $tmpNameTree[$key],
                     $sizeTree[$key],
                     $errorTree[$key],
-                    $nameTree[$key] ?? null,
-                    $typeTree[$key] ?? null
+                    isset($nameTree[$key]) ? $nameTree[$key] : null,
+                    isset($typeTree[$key]) ? $typeTree[$key] : null
                 );
                 continue;
             }
-            $normalized[$key] = createUploadedFile([
+            $normalized[$key] = createUploadedFile(array(
                 'tmp_name' => $tmpNameTree[$key],
                 'size' => $sizeTree[$key],
                 'error' => $errorTree[$key],
-                'name' => $nameTree[$key] ?? null,
-                'type' => $typeTree[$key] ?? null,
-            ]);
+                'name' => isset($nameTree[$key]) ? $nameTree[$key] : null,
+                'type' => isset($typeTree[$key]) ? $typeTree[$key] : null,
+            ));
         }
         return $normalized;
     };
@@ -79,7 +75,7 @@ function normalizeUploadedFiles(array $files) : array
      * @param array $files
      * @return UploadedFile[]
      */
-    $normalizeUploadedFileSpecification = function (array $files = []) use (&$recursiveNormalize) : array {
+    $normalizeUploadedFileSpecification = function (array $files = array()) use (&$recursiveNormalize) {
         if (! isset($files['tmp_name']) || ! is_array($files['tmp_name'])
             || ! isset($files['size']) || ! is_array($files['size'])
             || ! isset($files['error']) || ! is_array($files['error'])
@@ -96,12 +92,12 @@ function normalizeUploadedFiles(array $files) : array
             $files['tmp_name'],
             $files['size'],
             $files['error'],
-            $files['name'] ?? null,
-            $files['type'] ?? null
+            isset($files['name']) ? $files['name'] : null,
+            isset($files['type']) ? $files['type'] : null
         );
     };
 
-    $normalized = [];
+    $normalized = array();
     foreach ($files as $key => $value) {
         if ($value instanceof UploadedFileInterface) {
             $normalized[$key] = $value;

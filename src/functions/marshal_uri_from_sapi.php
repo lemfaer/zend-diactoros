@@ -5,22 +5,7 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
-
-use function array_change_key_case;
-use function array_key_exists;
-use function explode;
-use function implode;
-use function is_array;
-use function ltrim;
-use function preg_match;
-use function preg_replace;
-use function strlen;
-use function strpos;
-use function strtolower;
-use function substr;
 
 /**
  * Marshal a Uri instance based on the values presnt in the $_SERVER array and headers.
@@ -28,7 +13,7 @@ use function substr;
  * @param array $server SAPI parameters
  * @param array $headers HTTP request headers
  */
-function marshalUriFromSapi(array $server, array $headers) : Uri
+function marshalUriFromSapi(array $server, array $headers)
 {
     /**
      * Retrieve a header value from an array of headers using a case-insensitive lookup.
@@ -37,7 +22,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
      * @param mixed $default Default value to return if header not found
      * @return mixed
      */
-    $getHeaderFromArray = function (string $name, array $headers, $default = null) {
+    $getHeaderFromArray = function ($name, array $headers, $default = null) {
         $header  = strtolower($name);
         $headers = array_change_key_case($headers, CASE_LOWER);
         if (array_key_exists($header, $headers)) {
@@ -54,7 +39,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
      * @return array Array of two items, host and port, in that order (can be
      *     passed to a list() operation).
      */
-    $marshalHostAndPort = function (array $headers, array $server) use ($getHeaderFromArray) : array {
+    $marshalHostAndPort = function (array $headers, array $server) use ($getHeaderFromArray) {
         /**
         * @param string|array $host
         * @return array Array of two items, host and port, in that order (can be
@@ -73,14 +58,14 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
                 $port = (int) $matches[1];
             }
 
-            return [$host, $port];
+            return array($host, $port);
         };
 
         /**
         * @return array Array of two items, host and port, in that order (can be
         *     passed to a list() operation).
         */
-        $marshalIpv6HostAndPort = function (array $server, string $host, ?int $port) : array {
+        $marshalIpv6HostAndPort = function (array $server, $host, $port) {
             $host = '[' . $server['SERVER_ADDR'] . ']';
             $port = $port ?: 80;
             if ($port . ']' === substr($host, strrpos($host, ':') + 1)) {
@@ -88,10 +73,10 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
                 // Unset the port so the default port can be used
                 $port = null;
             }
-            return [$host, $port];
+            return array($host, $port);
         };
 
-        static $defaults = ['', null];
+        static $defaults = array('', null);
 
         if ($getHeaderFromArray('host', $headers, false)) {
             return $marshalHostAndPortFromHeader($getHeaderFromArray('host', $headers));
@@ -107,7 +92,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
         if (! isset($server['SERVER_ADDR'])
             || ! preg_match('/^\[[0-9a-fA-F\:]+\]$/', $host)
         ) {
-            return [$host, $port];
+            return array($host, $port);
         }
 
         // Misinterpreted IPv6-Address
@@ -129,22 +114,22 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
      * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
      * @license   http://framework.zend.com/license/new-bsd New BSD License
      */
-    $marshalRequestPath = function (array $server) : string {
+    $marshalRequestPath = function (array $server) {
         // IIS7 with URL Rewrite: make sure we get the unencoded url
         // (double slash problem).
-        $iisUrlRewritten = $server['IIS_WasUrlRewritten'] ?? null;
-        $unencodedUrl    = $server['UNENCODED_URL'] ?? '';
+        $iisUrlRewritten = isset($server['IIS_WasUrlRewritten']) ? $server['IIS_WasUrlRewritten'] : null;
+        $unencodedUrl    = isset($server['UNENCODED_URL']) ? $server['UNENCODED_URL'] : '';
         if ('1' === $iisUrlRewritten && ! empty($unencodedUrl)) {
             return $unencodedUrl;
         }
 
-        $requestUri = $server['REQUEST_URI'] ?? null;
+        $requestUri = isset($server['REQUEST_URI']) ? $server['REQUEST_URI'] : null;
 
         if ($requestUri !== null) {
             return preg_replace('#^[^/:]+://[^/]+#', '', $requestUri);
         }
 
-        $origPathInfo = $server['ORIG_PATH_INFO'] ?? null;
+        $origPathInfo = isset($server['ORIG_PATH_INFO']) ? $server['ORIG_PATH_INFO'] : null;
         if (empty($origPathInfo)) {
             return '/';
         }
@@ -156,7 +141,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
 
     // URI scheme
     $scheme = 'http';
-    $marshalHttpsValue = function ($https) : bool {
+    $marshalHttpsValue = function ($https) {
         if (is_bool($https)) {
             return $https;
         }
@@ -186,7 +171,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
     $uri = $uri->withScheme($scheme);
 
     // Set the host
-    [$host, $port] = $marshalHostAndPort($headers, $server);
+    list($host, $port) = $marshalHostAndPort($headers, $server);
     if (! empty($host)) {
         $uri = $uri->withHost($host);
         if (! empty($port)) {
@@ -198,7 +183,8 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
     $path = $marshalRequestPath($server);
 
     // Strip query string
-    $path = explode('?', $path, 2)[0];
+    $parts = explode('?', $path, 2);
+    $path = $parts[0];
 
     // URI query
     $query = '';
@@ -209,7 +195,7 @@ function marshalUriFromSapi(array $server, array $headers) : Uri
     // URI fragment
     $fragment = '';
     if (strpos($path, '#') !== false) {
-        [$path, $fragment] = explode('#', $path, 2);
+        list($path, $fragment) = explode('#', $path, 2);
     }
 
     return $uri

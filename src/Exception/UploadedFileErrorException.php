@@ -5,22 +5,18 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Exception;
 
 use RuntimeException;
 
-use function sprintf;
-
 class UploadedFileErrorException extends RuntimeException implements ExceptionInterface
 {
-    public static function forUnmovableFile() : self
+    public static function forUnmovableFile()
     {
         return new self('Error occurred while moving uploaded file');
     }
 
-    public static function dueToStreamUploadError(string $error) : self
+    public static function dueToStreamUploadError($error)
     {
         return new self(sprintf(
             'Cannot retrieve stream due to upload error: %s',
@@ -28,12 +24,12 @@ class UploadedFileErrorException extends RuntimeException implements ExceptionIn
         ));
     }
 
-    public static function dueToUnwritablePath() : self
+    public static function dueToUnwritablePath()
     {
         return new self('Unable to write to designated path');
     }
 
-    public static function dueToUnwritableTarget(string $targetDirectory) : self
+    public static function dueToUnwritableTarget($targetDirectory)
     {
         return new self(sprintf(
             'The target directory `%s` does not exists or is not writable',

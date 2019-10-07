@@ -1,10 +1,9 @@
-<phpunit bootstrap="./vendor/autoload.php" colors="true">
+<phpunit
+  bootstrap="./vendor/autoload.php"
+  colors="true">
     <testsuites>
         <testsuite name="Zend\\Diactoros Tests">
             <directory>./test</directory>
-        </testsuite>
-        <testsuite name="PSR-17 Integration Tests">
-            <directory>./vendor/http-interop/http-factory-tests/test</directory>
         </testsuite>
     </testsuites>
 

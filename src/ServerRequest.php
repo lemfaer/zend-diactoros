@@ -5,17 +5,12 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
-
-use function array_key_exists;
-use function is_array;
 
 /**
  * Server-side HTTP request
@@ -31,19 +26,17 @@ use function is_array;
  * implemented such that they retain the internal state of the current
  * message and return a new instance that contains the changed state.
  */
-class ServerRequest implements ServerRequestInterface
+class ServerRequest extends RequestTrait implements ServerRequestInterface
 {
-    use RequestTrait;
+    /**
+     * @var array
+     */
+    private $attributes = array();
 
     /**
      * @var array
      */
-    private $attributes = [];
-
-    /**
-     * @var array
-     */
-    private $cookieParams = [];
+    private $cookieParams = array();
 
     /**
      * @var null|array|object
@@ -53,7 +46,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * @var array
      */
-    private $queryParams = [];
+    private $queryParams = array();
 
     /**
      * @var array
@@ -79,16 +72,16 @@ class ServerRequest implements ServerRequestInterface
      * @throws Exception\InvalidArgumentException for any invalid value.
      */
     public function __construct(
-        array $serverParams = [],
-        array $uploadedFiles = [],
+        array $serverParams = array(),
+        array $uploadedFiles = array(),
         $uri = null,
-        string $method = null,
+        $method = null,
         $body = 'php://input',
-        array $headers = [],
-        array $cookies = [],
-        array $queryParams = [],
+        array $headers = array(),
+        array $cookies = array(),
+        array $queryParams = array(),
         $parsedBody = null,
-        string $protocol = '1.1'
+        $protocol = '1.1'
     ) {
         $this->validateUploadedFiles($uploadedFiles);
 
@@ -108,7 +101,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getServerParams() : array
+    public function getServerParams()
     {
         return $this->serverParams;
     }
@@ -116,7 +109,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getUploadedFiles() : array
+    public function getUploadedFiles()
     {
         return $this->uploadedFiles;
     }
@@ -124,7 +117,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withUploadedFiles(array $uploadedFiles) : ServerRequest
+    public function withUploadedFiles(array $uploadedFiles)
     {
         $this->validateUploadedFiles($uploadedFiles);
         $new = clone $this;
@@ -135,7 +128,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getCookieParams() : array
+    public function getCookieParams()
     {
         return $this->cookieParams;
     }
@@ -143,7 +136,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withCookieParams(array $cookies) : ServerRequest
+    public function withCookieParams(array $cookies)
     {
         $new = clone $this;
         $new->cookieParams = $cookies;
@@ -153,7 +146,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getQueryParams() : array
+    public function getQueryParams()
     {
         return $this->queryParams;
     }
@@ -161,7 +154,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withQueryParams(array $query) : ServerRequest
+    public function withQueryParams(array $query)
     {
         $new = clone $this;
         $new->queryParams = $query;
@@ -179,7 +172,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withParsedBody($data) : ServerRequest
+    public function withParsedBody($data)
     {
         if (! is_array($data) && ! is_object($data) && null !== $data) {
             throw new Exception\InvalidArgumentException(sprintf(
@@ -197,7 +190,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getAttributes() : array
+    public function getAttributes()
     {
         return $this->attributes;
     }
@@ -217,7 +210,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withAttribute($attribute, $value) : ServerRequest
+    public function withAttribute($attribute, $value)
     {
         $new = clone $this;
         $new->attributes[$attribute] = $value;
@@ -227,7 +220,7 @@ class ServerRequest implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withoutAttribute($attribute) : ServerRequest
+    public function withoutAttribute($attribute)
     {
         $new = clone $this;
         unset($new->attributes[$attribute]);
@@ -239,7 +232,7 @@ class ServerRequest implements ServerRequestInterface
      *
      * @throws Exception\InvalidArgumentException if any leaf is not an UploadedFileInterface instance.
      */
-    private function validateUploadedFiles(array $uploadedFiles) : void
+    private function validateUploadedFiles(array $uploadedFiles)
     {
         foreach ($uploadedFiles as $file) {
             if (is_array($file)) {

@@ -5,11 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
-use Psr\Http\Message\RequestFactoryInterface;
+use Zend\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 
 class RequestFactory implements RequestFactoryInterface
@@ -17,7 +15,7 @@ class RequestFactory implements RequestFactoryInterface
     /**
      * {@inheritDoc}
      */
-    public function createRequest(string $method, $uri) : RequestInterface
+    public function createRequest($method, $uri)
     {
         return new Request($uri, $method);
     }

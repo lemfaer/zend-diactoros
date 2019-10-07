@@ -5,15 +5,11 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
-use Psr\Http\Message\UploadedFileFactoryInterface;
+use Zend\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
-
-use const UPLOAD_ERR_OK;
 
 class UploadedFileFactory implements UploadedFileFactoryInterface
 {
@@ -22,11 +18,11 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
      */
     public function createUploadedFile(
         StreamInterface $stream,
-        int $size = null,
-        int $error = UPLOAD_ERR_OK,
-        string $clientFilename = null,
-        string $clientMediaType = null
-    ) : UploadedFileInterface {
+        $size = null,
+        $error = \UPLOAD_ERR_OK,
+        $clientFilename = null,
+        $clientMediaType = null
+    ) {
         if ($size === null) {
             $size = $stream->getSize();
         }

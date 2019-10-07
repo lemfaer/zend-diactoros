@@ -5,11 +5,7 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
-
-use function stream_get_contents;
 
 /**
  * Caching version of php://input
@@ -37,7 +33,7 @@ class PhpInputStream extends Stream
     /**
      * {@inheritdoc}
      */
-    public function __toString() : string
+    public function __toString()
     {
         if ($this->reachedEof) {
             return $this->cache;
@@ -50,7 +46,7 @@ class PhpInputStream extends Stream
     /**
      * {@inheritdoc}
      */
-    public function isWritable() : bool
+    public function isWritable()
     {
         return false;
     }
@@ -58,7 +54,7 @@ class PhpInputStream extends Stream
     /**
      * {@inheritdoc}
      */
-    public function read($length) : string
+    public function read($length)
     {
         $content = parent::read($length);
         if (! $this->reachedEof) {
@@ -75,7 +71,7 @@ class PhpInputStream extends Stream
     /**
      * {@inheritdoc}
      */
-    public function getContents($maxLength = -1) : string
+    public function getContents($maxLength = -1)
     {
         if ($this->reachedEof) {
             return $this->cache;

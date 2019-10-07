@@ -5,11 +5,7 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
-
-use function is_callable;
 
 /**
  * Marshal the $_SERVER array
@@ -23,7 +19,7 @@ use function is_callable;
  *     `apache_request_headers` under the Apache mod_php.
  * @return array Either $server verbatim, or with an added HTTP_AUTHORIZATION header.
  */
-function normalizeServer(array $server, callable $apacheRequestHeaderCallback = null) : array
+function normalizeServer(array $server, $apacheRequestHeaderCallback = null)
 {
     if (null === $apacheRequestHeaderCallback && is_callable('apache_request_headers')) {
         $apacheRequestHeaderCallback = 'apache_request_headers';

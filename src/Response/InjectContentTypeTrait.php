@@ -5,29 +5,23 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Response;
 
-use function array_keys;
-use function array_reduce;
-use function strtolower;
-
-trait InjectContentTypeTrait
+class InjectContentTypeTrait
 {
     /**
      * Inject the provided Content-Type, if none is already present.
      *
      * @return array Headers with injected Content-Type
      */
-    private function injectContentType(string $contentType, array $headers) : array
+    public static function injectContentType($contentType, array $headers)
     {
         $hasContentType = array_reduce(array_keys($headers), function ($carry, $item) {
             return $carry ?: (strtolower($item) === 'content-type');
         }, false);
 
         if (! $hasContentType) {
-            $headers['content-type'] = [$contentType];
+            $headers['content-type'] = array($contentType);
         }
 
         return $headers;

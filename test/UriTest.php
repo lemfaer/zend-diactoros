@@ -5,15 +5,11 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Diactoros\Uri;
-
-use function sprintf;
 
 class UriTest extends TestCase
 {
@@ -77,7 +73,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('https://user:pass@local.example.com:3001/foo?bar=baz#quz');
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         $uri->withUserInfo('matthew', 1);
     }
@@ -94,14 +90,14 @@ class UriTest extends TestCase
     public function userInfoProvider()
     {
         // @codingStandardsIgnoreStart
-        return [
-            // name       => [ user,              credential, expected ]
-            'valid-chars' => ['foo',              'bar',      'foo:bar'],
-            'colon'       => ['foo:bar',          'baz:bat',  'foo%3Abar:baz%3Abat'],
-            'at'          => ['user@example.com', 'cred@foo', 'user%40example.com:cred%40foo'],
-            'percent'     => ['%25',              '%25',      '%25:%25'],
-            'invalid-enc' => ['%ZZ',              '%GG',      '%25ZZ:%25GG'],
-        ];
+        return array(
+            // name       => array( user,              credential, expected )
+            'valid-chars' => array('foo',              'bar',      'foo:bar'),
+            'colon'       => array('foo:bar',          'baz:bat',  'foo%3Abar:baz%3Abat'),
+            'at'          => array('user@example.com', 'cred@foo', 'user%40example.com:cred%40foo'),
+            'percent'     => array('%25',              '%25',      '%25:%25'),
+            'invalid-enc' => array('%ZZ',              '%GG',      '%25ZZ:%25GG'),
+        );
         // @codingStandardsIgnoreEnd
     }
 
@@ -136,11 +132,11 @@ class UriTest extends TestCase
 
     public function validPorts()
     {
-        return [
-            'null'         => [ null ],
-            'int'          => [ 3000 ],
-            'string-int'   => [ '3000' ],
-        ];
+        return array(
+            'null'         => array(null),
+            'int'          => array(3000),
+            'string-int'   => array('3000'),
+        );
     }
 
     /**
@@ -168,17 +164,17 @@ class UriTest extends TestCase
 
     public function invalidPorts()
     {
-        return [
-            'true'       => [ true ],
-            'false'      => [ false ],
-            'string'     => [ 'string' ],
-            'float'      => [ 55.5 ],
-            'array'      => [ [ 3000 ] ],
-            'object'     => [ (object) ['port' => 3000 ] ],
-            'zero'       => [ 0 ],
-            'too-small'  => [ -1 ],
-            'too-big'    => [ 65536 ],
-        ];
+        return array(
+            'true'       => array(true),
+            'false'      => array(false),
+            'string'     => array('string'),
+            'float'      => array(55.5),
+            'array'      => array(array(3000)),
+            'object'     => array((object) array('port' => 3000)),
+            'zero'       => array(0),
+            'too-small'  => array(-1),
+            'too-big'    => array(65536),
+        );
     }
 
     /**
@@ -188,8 +184,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('https://user:pass@local.example.com:3001/foo?bar=baz#quz');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid port');
+        $this->setExpectedException("InvalidArgumentException", 'Invalid port');
 
         $uri->withPort($port);
     }
@@ -214,15 +209,15 @@ class UriTest extends TestCase
 
     public function invalidPaths()
     {
-        return [
-            'null'      => [ null ],
-            'true'      => [ true ],
-            'false'     => [ false ],
-            'array'     => [ [ '/bar/baz' ] ],
-            'object'    => [ (object) [ '/bar/baz' ] ],
-            'query'     => [ '/bar/baz?bat=quz' ],
-            'fragment'  => [ '/bar/baz#bat' ],
-        ];
+        return array(
+            'null'      => array(null),
+            'true'      => array(true),
+            'false'     => array(false),
+            'array'     => array(array('/bar/baz')),
+            'object'    => array((object) array('/bar/baz')),
+            'query'     => array('/bar/baz?bat=quz'),
+            'fragment'  => array('/bar/baz#bat'),
+        );
     }
 
     /**
@@ -232,8 +227,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('https://user:pass@local.example.com:3001/foo?bar=baz#quz');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid path');
+        $this->setExpectedException("InvalidArgumentException", 'Invalid path');
 
         $uri->withPath($path);
     }
@@ -249,14 +243,14 @@ class UriTest extends TestCase
 
     public function invalidQueryStrings()
     {
-        return [
-            'null'      => [ null ],
-            'true'      => [ true ],
-            'false'     => [ false ],
-            'array'     => [ [ 'baz=bat' ] ],
-            'object'    => [ (object) [ 'baz=bat' ] ],
-            'fragment'  => [ 'baz=bat#quz' ],
-        ];
+        return array(
+            'null'      => array(null),
+            'true'      => array(true),
+            'false'     => array(false),
+            'array'     => array(array('baz=bat')),
+            'object'    => array((object) array('baz=bat')),
+            'fragment'  => array('baz=bat#quz'),
+        );
     }
 
     /**
@@ -266,8 +260,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('https://user:pass@local.example.com:3001/foo?bar=baz#quz');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Query string');
+        $this->setExpectedException("InvalidArgumentException", 'Query string');
 
         $uri->withQuery($query);
     }
@@ -292,12 +285,12 @@ class UriTest extends TestCase
 
     public function authorityInfo()
     {
-        return [
-            'host-only'      => [ 'http://foo.com/bar',         'foo.com' ],
-            'host-port'      => [ 'http://foo.com:3000/bar',    'foo.com:3000' ],
-            'user-host'      => [ 'http://me@foo.com/bar',      'me@foo.com' ],
-            'user-host-port' => [ 'http://me@foo.com:3000/bar', 'me@foo.com:3000' ],
-        ];
+        return array(
+            'host-only'      => array('http://foo.com/bar',         'foo.com'),
+            'host-port'      => array('http://foo.com:3000/bar',    'foo.com:3000'),
+            'user-host'      => array('http://me@foo.com/bar',      'me@foo.com'),
+            'user-host-port' => array('http://me@foo.com:3000/bar', 'me@foo.com:3000'),
+        );
     }
 
     /**
@@ -343,7 +336,7 @@ class UriTest extends TestCase
 
     public function testConstructorRaisesExceptionForSeriouslyMalformedURI()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         new Uri('http:///www.php-fig.org/');
     }
@@ -364,13 +357,13 @@ class UriTest extends TestCase
 
     public function invalidSchemes()
     {
-        return [
-            'mailto' => [ 'mailto' ],
-            'ftp'    => [ 'ftp' ],
-            'telnet' => [ 'telnet' ],
-            'ssh'    => [ 'ssh' ],
-            'git'    => [ 'git' ],
-        ];
+        return array(
+            'mailto' => array('mailto'),
+            'ftp'    => array('ftp'),
+            'telnet' => array('telnet'),
+            'ssh'    => array('ssh'),
+            'git'    => array('git'),
+        );
     }
 
     /**
@@ -378,8 +371,7 @@ class UriTest extends TestCase
      */
     public function testConstructWithUnsupportedSchemeRaisesAnException($scheme)
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unsupported scheme');
+        $this->setExpectedException("InvalidArgumentException", 'Unsupported scheme');
 
         new Uri($scheme . '://example.com');
     }
@@ -391,8 +383,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('http://example.com');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unsupported scheme');
+        $this->setExpectedException("InvalidArgumentException", 'Unsupported scheme');
 
         $uri->withScheme($scheme);
     }
@@ -427,10 +418,10 @@ class UriTest extends TestCase
 
     public function standardSchemePortCombinations()
     {
-        return [
-            'http'  => [ 'http', 80 ],
-            'https' => [ 'https', 443 ],
-        ];
+        return array(
+            'http'  => array('http', 80),
+            'https' => array('https', 443),
+        );
     }
 
     /**
@@ -438,7 +429,8 @@ class UriTest extends TestCase
      */
     public function testAuthorityOmitsPortForStandardSchemePortCombinations($scheme, $port)
     {
-        $uri = (new Uri())
+        $uri = new Uri();
+        $uri = $uri
             ->withHost('example.com')
             ->withScheme($scheme)
             ->withPort($port);
@@ -447,15 +439,15 @@ class UriTest extends TestCase
 
     public function mutations()
     {
-        return [
-            'scheme'    => ['withScheme', 'https'],
-            'user-info' => ['withUserInfo', 'foo'],
-            'host'      => ['withHost', 'www.example.com'],
-            'port'      => ['withPort', 8080],
-            'path'      => ['withPath', '/changed'],
-            'query'     => ['withQuery', 'changed=value'],
-            'fragment'  => ['withFragment', 'changed'],
-        ];
+        return array(
+            'scheme'    => array('withScheme', 'https'),
+            'user-info' => array('withUserInfo', 'foo'),
+            'host'      => array('withHost', 'www.example.com'),
+            'port'      => array('withPort', 8080),
+            'path'      => array('withPath', '/changed'),
+            'query'     => array('withQuery', 'changed=value'),
+            'fragment'  => array('withFragment', 'changed'),
+        );
     }
 
     /**
@@ -477,27 +469,29 @@ class UriTest extends TestCase
      */
     public function testPathIsProperlyEncoded()
     {
-        $uri = (new Uri())->withPath('/foo^bar');
+        $uri = new Uri();
+        $uri = $uri->withPath('/foo^bar');
         $expected = '/foo%5Ebar';
         $this->assertSame($expected, $uri->getPath());
     }
 
     public function testPathDoesNotBecomeDoubleEncoded()
     {
-        $uri = (new Uri())->withPath('/foo%5Ebar');
+        $uri = new Uri();
+        $uri = $uri->withPath('/foo%5Ebar');
         $expected = '/foo%5Ebar';
         $this->assertSame($expected, $uri->getPath());
     }
 
     public function queryStringsForEncoding()
     {
-        return [
-            'key-only' => ['k^ey', 'k%5Eey'],
-            'key-value' => ['k^ey=valu`', 'k%5Eey=valu%60'],
-            'array-key-only' => ['key[]', 'key%5B%5D'],
-            'array-key-value' => ['key[]=valu`', 'key%5B%5D=valu%60'],
-            'complex' => ['k^ey&key[]=valu`&f<>=`bar', 'k%5Eey&key%5B%5D=valu%60&f%3C%3E=%60bar'],
-        ];
+        return array(
+            'key-only' => array('k^ey', 'k%5Eey'),
+            'key-value' => array('k^ey=valu`', 'k%5Eey=valu%60'),
+            'array-key-only' => array('key[]', 'key%5B%5D'),
+            'array-key-value' => array('key[]=valu`', 'key%5B%5D=valu%60'),
+            'complex' => array('k^ey&key[]=valu`&f<>=`bar', 'k%5Eey&key%5B%5D=valu%60&f%3C%3E=%60bar'),
+        );
     }
 
     /**
@@ -506,7 +500,8 @@ class UriTest extends TestCase
      */
     public function testQueryIsProperlyEncoded($query, $expected)
     {
-        $uri = (new Uri())->withQuery($query);
+        $uri = new Uri();
+        $uri = $uri->withQuery($query);
         $this->assertSame($expected, $uri->getQuery());
     }
 
@@ -516,7 +511,8 @@ class UriTest extends TestCase
      */
     public function testQueryIsNotDoubleEncoded($query, $expected)
     {
-        $uri = (new Uri())->withQuery($expected);
+        $uri = new Uri();
+        $uri = $uri->withQuery($expected);
         $this->assertSame($expected, $uri->getQuery());
     }
 
@@ -525,7 +521,8 @@ class UriTest extends TestCase
      */
     public function testFragmentIsProperlyEncoded()
     {
-        $uri = (new Uri())->withFragment('/p^th?key^=`bar#b@z');
+        $uri = new Uri();
+        $uri = $uri->withFragment('/p^th?key^=`bar#b@z');
         $expected = '/p%5Eth?key%5E=%60bar%23b@z';
         $this->assertSame($expected, $uri->getFragment());
     }
@@ -536,7 +533,8 @@ class UriTest extends TestCase
     public function testFragmentIsNotDoubleEncoded()
     {
         $expected = '/p%5Eth?key%5E=%60bar%23b@z';
-        $uri = (new Uri())->withFragment($expected);
+        $uri = new Uri();
+        $uri = $uri->withFragment($expected);
         $this->assertSame($expected, $uri->getFragment());
     }
 
@@ -549,16 +547,16 @@ class UriTest extends TestCase
 
     public function invalidStringComponentValues()
     {
-        $methods = [
+        $methods = array(
             'withScheme',
             'withUserInfo',
             'withHost',
             'withPath',
             'withQuery',
             'withFragment',
-        ];
+        );
 
-        $values = [
+        $values = array(
             'null'       => null,
             'true'       => true,
             'false'      => false,
@@ -566,15 +564,15 @@ class UriTest extends TestCase
             'int'        => 1,
             'zero-float' => 0.0,
             'float'      => 1.1,
-            'array'      => ['value'],
-            'object'     => (object)['value' => 'value'],
-        ];
+            'array'      => array('value'),
+            'object'     => (object) array('value' => 'value'),
+        );
 
-        $combinations = [];
+        $combinations = array();
         foreach ($methods as $method) {
             foreach ($values as $type => $value) {
                 $key = sprintf('%s-%s', $method, $type);
-                $combinations[$key] = [$method, $value];
+                $combinations[$key] = array($method, $value);
             }
         }
 
@@ -589,7 +587,7 @@ class UriTest extends TestCase
     {
         $uri = new Uri('https://example.com/');
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         $uri->$method($value);
     }
@@ -614,10 +612,10 @@ class UriTest extends TestCase
 
     public function utf8PathsDataProvider()
     {
-        return [
-            ['http://example.com/тестовый_путь/', '/тестовый_путь/'],
-            ['http://example.com/ουτοπία/', '/ουτοπία/']
-        ];
+        return array(
+            array('http://example.com/тестовый_путь/', '/тестовый_путь/'),
+            array('http://example.com/ουτοπία/', '/ουτοπία/')
+        );
     }
 
     /**
@@ -632,27 +630,30 @@ class UriTest extends TestCase
 
     public function utf8QueryStringsDataProvider()
     {
-        return [
-            ['http://example.com/?q=тестовый_путь', 'q=тестовый_путь'],
-            ['http://example.com/?q=ουτοπία', 'q=ουτοπία'],
-        ];
+        return array(
+            array('http://example.com/?q=тестовый_путь', 'q=тестовый_путь'),
+            array('http://example.com/?q=ουτοπία', 'q=ουτοπία'),
+        );
     }
 
     public function testUriDoesNotAppendColonToHostIfPortIsEmpty()
     {
-        $uri = (new Uri())->withHost('google.com');
+        $uri = new Uri();
+        $uri = $uri->withHost('google.com');
         $this->assertSame('//google.com', (string) $uri);
     }
 
     public function testAuthorityIsPrefixedByDoubleSlashIfPresent()
     {
-        $uri = (new Uri())->withHost('example.com');
+        $uri = new Uri();
+        $uri = $uri->withHost('example.com');
         $this->assertSame('//example.com', (string) $uri);
     }
 
     public function testReservedCharsInPathUnencoded()
     {
-        $uri = (new Uri())
+        $uri = new Uri();
+        $uri = $uri
             ->withScheme('https')
             ->withHost('api.linkedin.com')
             ->withPath('/v1/people/~:(first-name,last-name,email-address,picture-url)');
@@ -668,7 +669,8 @@ class UriTest extends TestCase
 
     public function testHostIsLowercaseWhenIsSetViwWithHost()
     {
-        $uri = (new Uri())->withHost('NEW-HOST.COM');
+        $uri = new Uri();
+        $uri = $uri->withHost('NEW-HOST.COM');
         $this->assertSame('new-host.com', $uri->getHost());
     }
 

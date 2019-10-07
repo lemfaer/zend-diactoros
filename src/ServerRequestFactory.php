@@ -5,15 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
-use Psr\Http\Message\ServerRequestFactoryInterface;
+use Zend\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
-use function array_key_exists;
-use function is_callable;
 
 /**
  * Class for marshaling a request object from the current PHP environment.
@@ -55,7 +50,7 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
         array $body = null,
         array $cookies = null,
         array $files = null
-    ) : ServerRequest {
+    ) {
         $server = normalizeServer(
             $server ?: $_SERVER,
             is_callable(self::$apacheRequestHeaders) ? self::$apacheRequestHeaders : null
@@ -84,9 +79,9 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
     /**
      * {@inheritDoc}
      */
-    public function createServerRequest(string $method, $uri, array $serverParams = []) : ServerRequestInterface
+    public function createServerRequest($method, $uri, array $serverParams = array())
     {
-        $uploadedFiles = [];
+        $uploadedFiles = array();
 
         return new ServerRequest(
             $serverParams,

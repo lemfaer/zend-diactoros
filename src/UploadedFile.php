@@ -5,49 +5,23 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
-use function dirname;
-use function fclose;
-use function fopen;
-use function fwrite;
-use function is_dir;
-use function is_int;
-use function is_resource;
-use function is_string;
-use function is_writable;
-use function move_uploaded_file;
-use function sprintf;
-use function strpos;
-
-use const PHP_SAPI;
-use const UPLOAD_ERR_CANT_WRITE;
-use const UPLOAD_ERR_EXTENSION;
-use const UPLOAD_ERR_FORM_SIZE;
-use const UPLOAD_ERR_INI_SIZE;
-use const UPLOAD_ERR_NO_FILE;
-use const UPLOAD_ERR_NO_TMP_DIR;
-use const UPLOAD_ERR_OK;
-use const UPLOAD_ERR_PARTIAL;
-
 class UploadedFile implements UploadedFileInterface
 {
-    const ERROR_MESSAGES = [
-        UPLOAD_ERR_OK         => 'There is no error, the file uploaded with success',
-        UPLOAD_ERR_INI_SIZE   => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
-        UPLOAD_ERR_FORM_SIZE  => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was '
-            . 'specified in the HTML form',
-        UPLOAD_ERR_PARTIAL    => 'The uploaded file was only partially uploaded',
-        UPLOAD_ERR_NO_FILE    => 'No file was uploaded',
-        UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder',
-        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-        UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
-    ];
+    public static $ERROR_MESSAGES = array(
+        \UPLOAD_ERR_OK         => 'There is no error, the file uploaded with success',
+        \UPLOAD_ERR_INI_SIZE   => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+        \UPLOAD_ERR_FORM_SIZE  => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
+        \UPLOAD_ERR_PARTIAL    => 'The uploaded file was only partially uploaded',
+        \UPLOAD_ERR_NO_FILE    => 'No file was uploaded',
+        \UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder',
+        \UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+        \UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
+    );
 
     /**
      * @var string|null
@@ -94,12 +68,12 @@ class UploadedFile implements UploadedFileInterface
      */
     public function __construct(
         $streamOrFile,
-        int $size,
-        int $errorStatus,
-        string $clientFilename = null,
-        string $clientMediaType = null
+        $size,
+        $errorStatus,
+        $clientFilename = null,
+        $clientMediaType = null
     ) {
-        if ($errorStatus === UPLOAD_ERR_OK) {
+        if ($errorStatus === \UPLOAD_ERR_OK) {
             if (is_string($streamOrFile)) {
                 $this->file = $streamOrFile;
             }
@@ -133,11 +107,11 @@ class UploadedFile implements UploadedFileInterface
      * @throws Exception\UploadedFileAlreadyMovedException if the upload was
      *     not successful.
      */
-    public function getStream() : StreamInterface
+    public function getStream()
     {
-        if ($this->error !== UPLOAD_ERR_OK) {
+        if ($this->error !== \UPLOAD_ERR_OK) {
             throw Exception\UploadedFileErrorException::dueToStreamUploadError(
-                self::ERROR_MESSAGES[$this->error]
+                self::$ERROR_MESSAGES[$this->error]
             );
         }
 
@@ -164,15 +138,15 @@ class UploadedFile implements UploadedFileInterface
      * @throws Exception\UploadedFileErrorException on any error during the
      *     move operation, or on the second or subsequent call to the method.
      */
-    public function moveTo($targetPath) : void
+    public function moveTo($targetPath)
     {
         if ($this->moved) {
             throw new Exception\UploadedFileAlreadyMovedException('Cannot move file; already moved!');
         }
 
-        if ($this->error !== UPLOAD_ERR_OK) {
+        if ($this->error !== \UPLOAD_ERR_OK) {
             throw Exception\UploadedFileErrorException::dueToStreamUploadError(
-                self::ERROR_MESSAGES[$this->error]
+                self::$ERROR_MESSAGES[$this->error]
             );
         }
 
@@ -187,7 +161,7 @@ class UploadedFile implements UploadedFileInterface
             throw Exception\UploadedFileErrorException::dueToUnwritableTarget($targetDirectory);
         }
 
-        $sapi = PHP_SAPI;
+        $sapi = \PHP_SAPI;
         switch (true) {
             case (empty($sapi) || 0 === strpos($sapi, 'cli') || 0 === strpos($sapi, 'phpdbg') || ! $this->file):
                 // Non-SAPI environment, or no filename present
@@ -209,7 +183,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @return int|null The file size in bytes or null if unknown.
      */
-    public function getSize() : ?int
+    public function getSize()
     {
         return $this->size;
     }
@@ -220,7 +194,7 @@ class UploadedFile implements UploadedFileInterface
      * @see http://php.net/manual/en/features.file-upload.errors.php
      * @return int One of PHP's UPLOAD_ERR_XXX constants.
      */
-    public function getError() : int
+    public function getError()
     {
         return $this->error;
     }
@@ -231,7 +205,7 @@ class UploadedFile implements UploadedFileInterface
      * @return string|null The filename sent by the client or null if none
      *     was provided.
      */
-    public function getClientFilename() : ?string
+    public function getClientFilename()
     {
         return $this->clientFilename;
     }
@@ -239,7 +213,7 @@ class UploadedFile implements UploadedFileInterface
     /**
      * {@inheritdoc}
      */
-    public function getClientMediaType() : ?string
+    public function getClientMediaType()
     {
         return $this->clientMediaType;
     }
@@ -249,7 +223,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @param string $path
      */
-    private function writeFile(string $path) : void
+    private function writeFile($path)
     {
         $handle = fopen($path, 'wb+');
         if (false === $handle) {

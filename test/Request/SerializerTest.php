@@ -5,12 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\Request;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use UnexpectedValueException;
@@ -20,14 +18,12 @@ use Zend\Diactoros\Request\Serializer;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
-use function json_encode;
-use function strlen;
-
 class SerializerTest extends TestCase
 {
     public function testSerializesBasicRequest()
     {
-        $request = (new Request())
+        $request = new Request();
+        $request = $request
             ->withMethod('GET')
             ->withUri(new Uri('http://example.com/foo/bar?baz=bat'))
             ->withAddedHeader('Accept', 'text/html');
@@ -41,11 +37,12 @@ class SerializerTest extends TestCase
 
     public function testSerializesRequestWithBody()
     {
-        $body   = json_encode(['test' => 'value']);
+        $body   = json_encode(array('test' => 'value'));
         $stream = new Stream('php://memory', 'wb+');
         $stream->write($body);
 
-        $request = (new Request())
+        $request = new Request();
+        $request = $request
             ->withMethod('POST')
             ->withUri(new Uri('http://example.com/foo/bar'))
             ->withAddedHeader('Accept', 'application/json')
@@ -59,7 +56,8 @@ class SerializerTest extends TestCase
 
     public function testSerializesMultipleHeadersCorrectly()
     {
-        $request = (new Request())
+        $request = new Request();
+        $request = $request
             ->withMethod('GET')
             ->withUri(new Uri('http://example.com/foo/bar?baz=bat'))
             ->withAddedHeader('X-Foo-Bar', 'Baz')
@@ -72,18 +70,18 @@ class SerializerTest extends TestCase
 
     public function originForms()
     {
-        return [
-            'path-only'      => [
+        return array(
+            'path-only'      => array(
                 'GET /foo HTTP/1.1',
                 '/foo',
-                ['getPath' => '/foo'],
-            ],
-            'path-and-query' => [
+                array('getPath' => '/foo'),
+            ),
+            'path-and-query' => array(
                 'GET /foo?bar HTTP/1.1',
                 '/foo?bar',
-                ['getPath' => '/foo', 'getQuery' => 'bar'],
-            ],
-        ];
+                array('getPath' => '/foo', 'getQuery' => 'bar'),
+            ),
+        );
     }
 
     /**
@@ -105,50 +103,50 @@ class SerializerTest extends TestCase
 
     public function absoluteForms()
     {
-        return [
-            'path-only'      => [
+        return array(
+            'path-only'      => array(
                 'GET http://example.com/foo HTTP/1.1',
                 'http://example.com/foo',
-                [
+                array(
                     'getScheme' => 'http',
                     'getHost'   => 'example.com',
                     'getPath'   => '/foo',
-                ],
-            ],
-            'path-and-query' => [
+                ),
+            ),
+            'path-and-query' => array(
                 'GET http://example.com/foo?bar HTTP/1.1',
                 'http://example.com/foo?bar',
-                [
+                array(
                     'getScheme' => 'http',
                     'getHost'   => 'example.com',
                     'getPath'   => '/foo',
                     'getQuery'  => 'bar',
-                ],
-            ],
-            'with-port'      => [
+                ),
+            ),
+            'with-port'      => array(
                 'GET http://example.com:8080/foo?bar HTTP/1.1',
                 'http://example.com:8080/foo?bar',
-                [
+                array(
                     'getScheme' => 'http',
                     'getHost'   => 'example.com',
                     'getPort'   => 8080,
                     'getPath'   => '/foo',
                     'getQuery'  => 'bar',
-                ],
-            ],
-            'with-authority' => [
+                ),
+            ),
+            'with-authority' => array(
                 'GET https://me:too@example.com:8080/foo?bar HTTP/1.1',
                 'https://me:too@example.com:8080/foo?bar',
-                [
+                array(
                     'getScheme'   => 'https',
                     'getUserInfo' => 'me:too',
                     'getHost'     => 'example.com',
                     'getPort'     => 8080,
                     'getPath'     => '/foo',
                     'getQuery'    => 'bar',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -197,12 +195,12 @@ class SerializerTest extends TestCase
 
     public function invalidRequestLines()
     {
-        return [
-            'missing-method'   => ['/foo/bar HTTP/1.1'],
-            'missing-target'   => ['GET HTTP/1.1'],
-            'missing-protocol' => ['GET /foo/bar'],
-            'simply-malformed' => ['What is this mess?'],
-        ];
+        return array(
+            'missing-method'   => array('/foo/bar HTTP/1.1'),
+            'missing-target'   => array('GET HTTP/1.1'),
+            'missing-protocol' => array('GET /foo/bar'),
+            'simply-malformed' => array('What is this mess?'),
+        );
     }
 
     /**
@@ -212,7 +210,7 @@ class SerializerTest extends TestCase
     {
         $message = $line . "\r\nX-Foo-Bar: Baz\r\n\r\nContent";
 
-        $this->expectException(UnexpectedValueException::class);
+        $this->setExpectedException("UnexpectedValueException");
 
         Serializer::fromString($message);
     }
@@ -222,20 +220,20 @@ class SerializerTest extends TestCase
         $text = "POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz\r\nX-Foo-Bar: Bat\r\n\r\nContent!";
         $request = Serializer::fromString($text);
 
-        $this->assertInstanceOf(RequestInterface::class, $request);
-        $this->assertInstanceOf(Request::class, $request);
+        $this->assertInstanceOf("Psr\Http\Message\RequestInterface", $request);
+        $this->assertInstanceOf("Zend\Diactoros\Request", $request);
 
         $this->assertTrue($request->hasHeader('X-Foo-Bar'));
         $values = $request->getHeader('X-Foo-Bar');
-        $this->assertSame(['Baz', 'Bat'], $values);
+        $this->assertSame(array('Baz', 'Bat'), $values);
     }
 
     public function headersWithContinuationLines()
     {
-        return [
-            'space' => ["POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz;\r\n Bat\r\n\r\nContent!"],
-            'tab' => ["POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz;\r\n\tBat\r\n\r\nContent!"],
-        ];
+        return array(
+            'space' => array("POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz;\r\n Bat\r\n\r\nContent!"),
+            'tab' => array("POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz;\r\n\tBat\r\n\r\nContent!"),
+        );
     }
 
     /**
@@ -245,8 +243,8 @@ class SerializerTest extends TestCase
     {
         $request = Serializer::fromString($text);
 
-        $this->assertInstanceOf(RequestInterface::class, $request);
-        $this->assertInstanceOf(Request::class, $request);
+        $this->assertInstanceOf("Psr\Http\Message\RequestInterface", $request);
+        $this->assertInstanceOf("Zend\Diactoros\Request", $request);
 
         $this->assertTrue($request->hasHeader('X-Foo-Bar'));
         $this->assertSame('Baz;Bat', $request->getHeaderLine('X-Foo-Bar'));
@@ -254,20 +252,20 @@ class SerializerTest extends TestCase
 
     public function messagesWithInvalidHeaders()
     {
-        return [
-            'invalid-name' => [
+        return array(
+            'invalid-name' => array(
                 "GET /foo HTTP/1.1\r\nThi;-I()-Invalid: value",
                 'Invalid header detected'
-            ],
-            'invalid-format' => [
+            ),
+            'invalid-format' => array(
                 "POST /foo HTTP/1.1\r\nThis is not a header\r\n\r\nContent",
                 'Invalid header detected'
-            ],
-            'invalid-continuation' => [
+            ),
+            'invalid-continuation' => array(
                 "POST /foo HTTP/1.1\r\nX-Foo-Bar: Baz\r\nInvalid continuation\r\nContent",
                 'Invalid header continuation'
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -275,28 +273,27 @@ class SerializerTest extends TestCase
      */
     public function testDeserializationRaisesExceptionForMalformedHeaders($message, $exceptionMessage)
     {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage($exceptionMessage);
+        $this->setExpectedException("UnexpectedValueException", $exceptionMessage);
 
         Serializer::fromString($message);
     }
 
     public function testFromStreamThrowsExceptionWhenStreamIsNotReadable()
     {
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->getMock("Psr\Http\Message\StreamInterface");
         $stream
             ->expects($this->once())
             ->method('isReadable')
             ->will($this->returnValue(false));
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         Serializer::fromStream($stream);
     }
 
     public function testFromStreamThrowsExceptionWhenStreamIsNotSeekable()
     {
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->getMock("Psr\Http\Message\StreamInterface");
         $stream
             ->expects($this->once())
             ->method('isReadable')
@@ -306,7 +303,7 @@ class SerializerTest extends TestCase
             ->method('isSeekable')
             ->will($this->returnValue(false));
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         Serializer::fromStream($stream);
     }
@@ -316,7 +313,7 @@ class SerializerTest extends TestCase
         $headers = "POST /foo HTTP/1.0\r\nContent-Type: text/plain\r\nX-Foo-Bar: Baz;\r\n Bat\r\n\r\n";
         $payload = $headers . "Content!";
 
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->getMock("Psr\Http\Message\StreamInterface");
         $stream
             ->expects($this->once())
             ->method('isReadable')
@@ -337,6 +334,6 @@ class SerializerTest extends TestCase
 
         $stream = Serializer::fromStream($stream);
 
-        $this->assertInstanceOf(RelativeStream::class, $stream->getBody());
+        $this->assertInstanceOf("Zend\Diactoros\RelativeStream", $stream->getBody());
     }
 }

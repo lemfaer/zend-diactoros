@@ -5,19 +5,17 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Exception;
 
 use RuntimeException;
-use Throwable;
+use Exception;
 
 class InvalidStreamPointerPositionException extends RuntimeException implements ExceptionInterface
 {
     public function __construct(
-        string $message = 'Invalid pointer position',
+        $message = 'Invalid pointer position',
         $code = 0,
-        Throwable $previous = null
+        Exception $previous = null
     ) {
         parent::__construct($message, $code, $previous);
     }

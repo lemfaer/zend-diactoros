@@ -5,15 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\StreamInterface;
-
-use function array_key_exists;
-
-use const SEEK_SET;
 
 /**
  * Implementation of PSR HTTP streams
@@ -29,7 +23,7 @@ class CallbackStream implements StreamInterface
      * @param callable $callback
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(callable $callback)
+    public function __construct($callback)
     {
         $this->attach($callback);
     }
@@ -37,7 +31,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString() : string
+    public function __toString()
     {
         return $this->getContents();
     }
@@ -45,7 +39,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function close() : void
+    public function close()
     {
         $this->callback = null;
     }
@@ -53,7 +47,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function detach() : ?callable
+    public function detach()
     {
         $callback = $this->callback;
         $this->callback = null;
@@ -63,7 +57,7 @@ class CallbackStream implements StreamInterface
     /**
      * Attach a new callback to the instance.
      */
-    public function attach(callable $callback) : void
+    public function attach($callback)
     {
         $this->callback = $callback;
     }
@@ -71,7 +65,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getSize() : ?int
+    public function getSize()
     {
         return null;
     }
@@ -79,7 +73,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function tell() : int
+    public function tell()
     {
         throw Exception\UntellableStreamException::forCallbackStream();
     }
@@ -87,7 +81,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function eof() : bool
+    public function eof()
     {
         return empty($this->callback);
     }
@@ -95,7 +89,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isSeekable() : bool
+    public function isSeekable()
     {
         return false;
     }
@@ -103,7 +97,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek($offset, $whence = SEEK_SET)
+    public function seek($offset, $whence = \SEEK_SET)
     {
         throw Exception\UnseekableStreamException::forCallbackStream();
     }
@@ -111,7 +105,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function rewind() : void
+    public function rewind()
     {
         throw Exception\UnrewindableStreamException::forCallbackStream();
     }
@@ -119,7 +113,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isWritable() : bool
+    public function isWritable()
     {
         return false;
     }
@@ -127,7 +121,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function write($string) : void
+    public function write($string)
     {
         throw Exception\UnwritableStreamException::forCallbackStream();
     }
@@ -135,7 +129,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isReadable() : bool
+    public function isReadable()
     {
         return false;
     }
@@ -143,7 +137,7 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function read($length) : string
+    public function read($length)
     {
         throw Exception\UnreadableStreamException::forCallbackStream();
     }
@@ -151,10 +145,10 @@ class CallbackStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getContents() : string
+    public function getContents()
     {
         $callback = $this->detach();
-        $contents = $callback ? $callback() : '';
+        $contents = $callback ? call_user_func($callback) : '';
         return (string) $contents;
     }
 
@@ -163,11 +157,11 @@ class CallbackStream implements StreamInterface
      */
     public function getMetadata($key = null)
     {
-        $metadata = [
+        $metadata = array(
             'eof' => $this->eof(),
             'stream_type' => 'callback',
             'seekable' => false
-        ];
+        );
 
         if (null === $key) {
             return $metadata;

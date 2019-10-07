@@ -5,21 +5,14 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
 use DOMDocument;
 use DOMXPath;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-
-use function in_array;
-use function libxml_set_streams_context;
-use function preg_match;
-use function stream_context_create;
 
 class ResponseTest extends TestCase
 {
@@ -57,13 +50,13 @@ class ResponseTest extends TestCase
 
         libxml_set_streams_context(
             stream_context_create(
-                [
-                    'http' => [
+                array(
+                    'http' => array(
                         'method'  => 'GET',
                         'timeout' => 30,
                         'user_agent' => 'PHP',
-                    ],
-                ]
+                    ),
+                )
             )
         );
 
@@ -73,7 +66,7 @@ class ResponseTest extends TestCase
             self::fail('Unable to retrieve IANA response status codes due to timeout or invalid XML');
         }
 
-        $ianaCodesReasonPhrases = [];
+        $ianaCodesReasonPhrases = array();
 
         $xpath = new DOMXPath($ianaHttpStatusCodes);
         $xpath->registerNamespace('ns', 'http://www.iana.org/assignments');
@@ -84,16 +77,16 @@ class ResponseTest extends TestCase
             $value = $xpath->query('.//ns:value', $record)->item(0)->nodeValue;
             $description = $xpath->query('.//ns:description', $record)->item(0)->nodeValue;
 
-            if (in_array($description, ['Unassigned', '(Unused)'])) {
+            if (in_array($description, array('Unassigned', '(Unused)'))) {
                 continue;
             }
 
             if (preg_match('/^([0-9]+)\s*\-\s*([0-9]+)$/', $value, $matches)) {
                 for ($value = $matches[1]; $value <= $matches[2]; $value++) {
-                    $ianaCodesReasonPhrases[] = [$value, $description];
+                    $ianaCodesReasonPhrases[] = array($value, $description);
                 }
             } else {
-                $ianaCodesReasonPhrases[] = [$value, $description];
+                $ianaCodesReasonPhrases[] = array($value, $description);
             }
         }
 
@@ -117,15 +110,15 @@ class ResponseTest extends TestCase
 
     public function invalidReasonPhrases()
     {
-        return [
-            'true' => [ true ],
-            'false' => [ false ],
-            'array' => [ [ 200 ] ],
-            'object' => [ (object) [ 'reasonPhrase' => 'Ok' ] ],
-            'integer' => [99],
-            'float' => [400.5],
-            'null' => [null],
-        ];
+        return array(
+            'true' => array(true),
+            'false' => array(false),
+            'array' => array(array(200)),
+            'object' => array((object) array('reasonPhrase' => 'Ok')),
+            'integer' => array(98),
+            'float' => array(400.5),
+            'null' => array(null),
+        );
     }
 
     /**
@@ -133,25 +126,25 @@ class ResponseTest extends TestCase
      */
     public function testWithStatusRaisesAnExceptionForNonStringReasonPhrases($invalidReasonPhrase)
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         $this->response->withStatus(422, $invalidReasonPhrase);
     }
 
     public function testConstructorRaisesExceptionForInvalidStream()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
-        new Response([ 'TOTALLY INVALID' ]);
+        new Response(array('TOTALLY INVALID'));
     }
 
     public function testConstructorCanAcceptAllMessageParts()
     {
         $body = new Stream('php://memory');
         $status = 302;
-        $headers = [
-            'location' => [ 'http://example.com/' ],
-        ];
+        $headers = array(
+            'location' => array('http://example.com/'),
+        );
 
         $response = new Response($body, $status, $headers);
         $this->assertSame($body, $response->getBody());
@@ -174,12 +167,12 @@ class ResponseTest extends TestCase
 
     public function validStatusCodes()
     {
-        return [
-            'minimum' => [100],
-            'middle' => [300],
-            'string-integer' => ['300'],
-            'maximum' => [599],
-        ];
+        return array(
+            'minimum' => array(100),
+            'middle' => array(300),
+            'string-integer' => array('300'),
+            'maximum' => array(599),
+        );
     }
 
     /**
@@ -187,36 +180,36 @@ class ResponseTest extends TestCase
      */
     public function testCannotSetInvalidStatusCode($code)
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         $this->response->withStatus($code);
     }
 
     public function invalidStatusCodes()
     {
-        return [
-            'true' => [ true ],
-            'false' => [ false ],
-            'array' => [ [ 200 ] ],
-            'object' => [ (object) [ 'statusCode' => 200 ] ],
-            'too-low' => [99],
-            'float' => [400.5],
-            'too-high' => [600],
-            'null' => [null],
-            'string' => ['foo'],
-        ];
+        return array(
+            'true' => array(true),
+            'false' => array(false),
+            'array' => array(array(200)),
+            'object' => array((object) array('statusCode' => 200)),
+            'too-low' => array(99),
+            'float' => array(400.5),
+            'too-high' => array(600),
+            'null' => array(null),
+            'string' => array('foo'),
+        );
     }
 
     public function invalidResponseBody()
     {
-        return [
-            'true'       => [ true ],
-            'false'      => [ false ],
-            'int'        => [ 1 ],
-            'float'      => [ 1.1 ],
-            'array'      => [ ['BODY'] ],
-            'stdClass'   => [ (object) [ 'body' => 'BODY'] ],
-        ];
+        return array(
+            'true'       => array(true),
+            'false'      => array(false),
+            'int'        => array(1),
+            'float'      => array(1.1),
+            'array'      => array(array('BODY')),
+            'stdClass'   => array((object) array('body' => 'BODY')),
+        );
     }
 
     /**
@@ -224,8 +217,7 @@ class ResponseTest extends TestCase
      */
     public function testConstructorRaisesExceptionForInvalidBody($body)
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('stream');
+        $this->setExpectedException("InvalidArgumentException", 'stream');
 
         new Response($body);
     }
@@ -233,13 +225,13 @@ class ResponseTest extends TestCase
 
     public function invalidHeaderTypes()
     {
-        return [
-            'indexed-array' => [[['INVALID']], 'header name'],
-            'null' => [['x-invalid-null' => null]],
-            'true' => [['x-invalid-true' => true]],
-            'false' => [['x-invalid-false' => false]],
-            'object' => [['x-invalid-object' => (object) ['INVALID']]],
-        ];
+        return array(
+            'indexed-array' => array(array(array('INVALID')), 'header name'),
+            'null' => array(array('x-invalid-null' => null)),
+            'true' => array(array('x-invalid-true' => true)),
+            'false' => array(array('x-invalid-false' => false)),
+            'object' => array(array('x-invalid-object' => (object) array('INVALID'))),
+        );
     }
 
     /**
@@ -248,8 +240,7 @@ class ResponseTest extends TestCase
      */
     public function testConstructorRaisesExceptionForInvalidHeaders($headers, $contains = 'header value type')
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($contains);
+        $this->setExpectedException("InvalidArgumentException", $contains);
 
         new Response('php://memory', 200, $headers);
     }
@@ -263,20 +254,20 @@ class ResponseTest extends TestCase
 
     public function headersWithInjectionVectors()
     {
-        return [
-            'name-with-cr'           => ["X-Foo\r-Bar", 'value'],
-            'name-with-lf'           => ["X-Foo\n-Bar", 'value'],
-            'name-with-crlf'         => ["X-Foo\r\n-Bar", 'value'],
-            'name-with-2crlf'        => ["X-Foo\r\n\r\n-Bar", 'value'],
-            'value-with-cr'          => ['X-Foo-Bar', "value\rinjection"],
-            'value-with-lf'          => ['X-Foo-Bar', "value\ninjection"],
-            'value-with-crlf'        => ['X-Foo-Bar', "value\r\ninjection"],
-            'value-with-2crlf'       => ['X-Foo-Bar', "value\r\n\r\ninjection"],
-            'array-value-with-cr'    => ['X-Foo-Bar', ["value\rinjection"]],
-            'array-value-with-lf'    => ['X-Foo-Bar', ["value\ninjection"]],
-            'array-value-with-crlf'  => ['X-Foo-Bar', ["value\r\ninjection"]],
-            'array-value-with-2crlf' => ['X-Foo-Bar', ["value\r\n\r\ninjection"]],
-        ];
+        return array(
+            'name-with-cr'           => array("X-Foo\r-Bar", 'value'),
+            'name-with-lf'           => array("X-Foo\n-Bar", 'value'),
+            'name-with-crlf'         => array("X-Foo\r\n-Bar", 'value'),
+            'name-with-2crlf'        => array("X-Foo\r\n\r\n-Bar", 'value'),
+            'value-with-cr'          => array('X-Foo-Bar', "value\rinjection"),
+            'value-with-lf'          => array('X-Foo-Bar', "value\ninjection"),
+            'value-with-crlf'        => array('X-Foo-Bar', "value\r\ninjection"),
+            'value-with-2crlf'       => array('X-Foo-Bar', "value\r\n\r\ninjection"),
+            'array-value-with-cr'    => array('X-Foo-Bar', array("value\rinjection")),
+            'array-value-with-lf'    => array('X-Foo-Bar', array("value\ninjection")),
+            'array-value-with-crlf'  => array('X-Foo-Bar', array("value\r\ninjection")),
+            'array-value-with-2crlf' => array('X-Foo-Bar', array("value\r\n\r\ninjection")),
+        );
     }
 
     /**
@@ -285,8 +276,8 @@ class ResponseTest extends TestCase
      */
     public function testConstructorRaisesExceptionForHeadersWithCRLFVectors($name, $value)
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
-        new Response('php://memory', 200, [$name => $value]);
+        new Response('php://memory', 200, array($name => $value));
     }
 }

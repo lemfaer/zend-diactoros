@@ -5,8 +5,6 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\TestAsset;
 
 /**
@@ -17,14 +15,14 @@ class HeaderStack
     /**
      * @var string[][]
      */
-    private static $data = [];
+    private static $data = array();
 
     /**
      * Reset state
      */
     public static function reset()
     {
-        self::$data = [];
+        self::$data = array();
     }
 
     /**

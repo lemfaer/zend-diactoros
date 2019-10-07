@@ -5,15 +5,11 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Exception;
-
-use Throwable;
 
 /**
  * Marker interface for package-specific exceptions.
  */
-interface ExceptionInterface extends Throwable
+interface ExceptionInterface
 {
 }

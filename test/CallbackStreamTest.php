@@ -5,11 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use RuntimeException;
 use Zend\Diactoros\CallbackStream;
 
@@ -94,7 +92,7 @@ class CallbackStreamTest extends TestCase
         $stream = new CallbackStream(function () {
         });
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->tell();
     }
@@ -128,7 +126,7 @@ class CallbackStreamTest extends TestCase
         $stream = new CallbackStream(function () {
         });
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->seek(0);
     }
@@ -138,7 +136,7 @@ class CallbackStreamTest extends TestCase
         $stream = new CallbackStream(function () {
         });
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->rewind();
     }
@@ -148,7 +146,7 @@ class CallbackStreamTest extends TestCase
         $stream = new CallbackStream(function () {
         });
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->write('foobarbaz');
     }
@@ -158,7 +156,7 @@ class CallbackStreamTest extends TestCase
         $stream = new CallbackStream(function () {
         });
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->read(3);
     }
@@ -188,11 +186,11 @@ class CallbackStreamTest extends TestCase
         $this->assertFalse($ret);
 
         $all = $stream->getMetadata();
-        $this->assertSame([
+        $this->assertSame(array(
             'eof' => false,
             'stream_type' => 'callback',
             'seekable' => false,
-        ], $all);
+        ), $all);
 
         $notExists = $stream->getMetadata('boo');
         $this->assertNull($notExists);
@@ -203,10 +201,10 @@ class CallbackStreamTest extends TestCase
         $class = __CLASS__;
 
         // @codingStandardsIgnoreStart
-        return [
-            'instance-method' => [[new self(), 'sampleCallback'],   $class . '::sampleCallback'],
-            'static-method'   => [[$class, 'sampleStaticCallback'], $class . '::sampleStaticCallback'],
-        ];
+        return array(
+            'instance-method' => array(array(new self(), 'sampleCallback'),   $class . '::sampleCallback'),
+            'static-method'   => array(array($class, 'sampleStaticCallback'), $class . '::sampleStaticCallback'),
+        );
         // @codingStandardsIgnoreEnd
     }
 

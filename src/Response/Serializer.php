@@ -5,8 +5,6 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Response;
 
 use Psr\Http\Message\ResponseInterface;
@@ -16,9 +14,6 @@ use Zend\Diactoros\Exception;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
-use function preg_match;
-use function sprintf;
-
 final class Serializer extends AbstractSerializer
 {
     /**
@@ -26,7 +21,7 @@ final class Serializer extends AbstractSerializer
      *
      * @throws Exception\SerializationException when errors occur parsing the message.
      */
-    public static function fromString(string $message) : Response
+    public static function fromString($message)
     {
         $stream = new Stream('php://temp', 'wb+');
         $stream->write($message);
@@ -39,7 +34,7 @@ final class Serializer extends AbstractSerializer
      * @throws Exception\InvalidArgumentException when the stream is not readable.
      * @throws Exception\SerializationException when errors occur parsing the message.
      */
-    public static function fromStream(StreamInterface $stream) : Response
+    public static function fromStream(StreamInterface $stream)
     {
         if (! $stream->isReadable() || ! $stream->isSeekable()) {
             throw new Exception\InvalidArgumentException('Message stream must be both readable and seekable');
@@ -47,10 +42,12 @@ final class Serializer extends AbstractSerializer
 
         $stream->rewind();
 
-        [$version, $status, $reasonPhrase] = self::getStatusLine($stream);
-        [$headers, $body]                  = self::splitStream($stream);
+        list($version, $status, $reasonPhrase) = self::getStatusLine($stream);
+        list($headers, $body)                  = self::splitStream($stream);
 
-        return (new Response($body, $status, $headers))
+        $response = new Response($body, $status, $headers);
+
+        return $response
             ->withProtocolVersion($version)
             ->withStatus((int) $status, $reasonPhrase);
     }
@@ -58,7 +55,7 @@ final class Serializer extends AbstractSerializer
     /**
      * Create a string representation of a response.
      */
-    public static function toString(ResponseInterface $response) : string
+    public static function toString(ResponseInterface $response)
     {
         $reasonPhrase = $response->getReasonPhrase();
         $headers      = self::serializeHeaders($response->getHeaders());
@@ -87,7 +84,7 @@ final class Serializer extends AbstractSerializer
      * @return array Array with three elements: 0 => version, 1 => status, 2 => reason
      * @throws Exception\SerializationException if line is malformed
      */
-    private static function getStatusLine(StreamInterface $stream) : array
+    private static function getStatusLine(StreamInterface $stream)
     {
         $line = self::getLine($stream);
 
@@ -99,6 +96,6 @@ final class Serializer extends AbstractSerializer
             throw Exception\SerializationException::forInvalidStatusLine();
         }
 
-        return [$matches['version'], (int) $matches['status'], isset($matches['reason']) ? $matches['reason'] : ''];
+        return array($matches['version'], (int) $matches['status'], isset($matches['reason']) ? $matches['reason'] : '');
     }
 }

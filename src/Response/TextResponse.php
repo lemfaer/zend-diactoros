@@ -5,20 +5,12 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Response;
 
 use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Exception;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-
-use function get_class;
-use function gettype;
-use function is_object;
-use function is_string;
-use function sprintf;
 
 /**
  * Plain text response.
@@ -29,8 +21,6 @@ use function sprintf;
  */
 class TextResponse extends Response
 {
-    use InjectContentTypeTrait;
-
     /**
      * Create a plain text response.
      *
@@ -42,7 +32,7 @@ class TextResponse extends Response
      * @param array $headers Array of headers to use at initialization.
      * @throws Exception\InvalidArgumentException if $text is neither a string or stream.
      */
-    public function __construct($text, int $status = 200, array $headers = [])
+    public function __construct($text, $status = 200, array $headers = array())
     {
         parent::__construct(
             $this->createBody($text),
@@ -57,7 +47,7 @@ class TextResponse extends Response
      * @param string|StreamInterface $text
      * @throws Exception\InvalidArgumentException if $text is neither a string or stream.
      */
-    private function createBody($text) : StreamInterface
+    private function createBody($text)
     {
         if ($text instanceof StreamInterface) {
             return $text;
@@ -75,5 +65,10 @@ class TextResponse extends Response
         $body->write($text);
         $body->rewind();
         return $body;
+    }
+
+    private function injectContentType($contentType, array $headers)
+    {
+        return InjectContentTypeTrait::injectContentType($contentType, $headers);
     }
 }

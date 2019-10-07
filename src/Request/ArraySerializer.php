@@ -5,17 +5,12 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Request;
 
 use Psr\Http\Message\RequestInterface;
-use Throwable;
 use Zend\Diactoros\Exception;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
-
-use function sprintf;
 
 /**
  * Serialize or deserialize request messages to/from arrays.
@@ -29,16 +24,16 @@ final class ArraySerializer
     /**
      * Serialize a request message to an array.
      */
-    public static function toArray(RequestInterface $request) : array
+    public static function toArray(RequestInterface $request)
     {
-        return [
+        return array(
             'method'           => $request->getMethod(),
             'request_target'   => $request->getRequestTarget(),
             'uri'              => (string) $request->getUri(),
             'protocol_version' => $request->getProtocolVersion(),
             'headers'          => $request->getHeaders(),
             'body'             => (string) $request->getBody(),
-        ];
+        );
     }
 
     /**
@@ -46,7 +41,7 @@ final class ArraySerializer
      *
      * @throws Exception\DeserializationException when cannot deserialize response
      */
-    public static function fromArray(array $serializedRequest) : Request
+    public static function fromArray(array $serializedRequest)
     {
         try {
             $uri             = self::getValueFromKey($serializedRequest, 'uri');
@@ -57,10 +52,12 @@ final class ArraySerializer
             $requestTarget   = self::getValueFromKey($serializedRequest, 'request_target');
             $protocolVersion = self::getValueFromKey($serializedRequest, 'protocol_version');
 
-            return (new Request($uri, $method, $body, $headers))
+            $request = new Request($uri, $method, $body, $headers);
+
+            return $request
                 ->withRequestTarget($requestTarget)
                 ->withProtocolVersion($protocolVersion);
-        } catch (Throwable $exception) {
+        } catch (\Exception $exception) {
             throw Exception\DeserializationException::forRequestFromArray($exception);
         }
     }
@@ -69,7 +66,7 @@ final class ArraySerializer
      * @return mixed
      * @throws Exception\DeserializationException
      */
-    private static function getValueFromKey(array $data, string $key, string $message = null)
+    private static function getValueFromKey(array $data, $key, $message = null)
     {
         if (isset($data[$key])) {
             return $data[$key];

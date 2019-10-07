@@ -5,20 +5,12 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Response;
 
 use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Exception;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-
-use function get_class;
-use function gettype;
-use function is_object;
-use function is_string;
-use function sprintf;
 
 /**
  * XML response.
@@ -28,8 +20,6 @@ use function sprintf;
  */
 class XmlResponse extends Response
 {
-    use InjectContentTypeTrait;
-
     /**
      * Create an XML response.
      *
@@ -43,8 +33,8 @@ class XmlResponse extends Response
      */
     public function __construct(
         $xml,
-        int $status = 200,
-        array $headers = []
+        $status = 200,
+        array $headers = array()
     ) {
         parent::__construct(
             $this->createBody($xml),
@@ -59,7 +49,7 @@ class XmlResponse extends Response
      * @param string|StreamInterface $xml
      * @throws Exception\InvalidArgumentException if $xml is neither a string or stream.
      */
-    private function createBody($xml) : StreamInterface
+    private function createBody($xml)
     {
         if ($xml instanceof StreamInterface) {
             return $xml;
@@ -77,5 +67,10 @@ class XmlResponse extends Response
         $body->write($xml);
         $body->rewind();
         return $body;
+    }
+
+    private function injectContentType($contentType, array $headers)
+    {
+        return InjectContentTypeTrait::injectContentType($contentType, $headers);
     }
 }

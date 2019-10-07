@@ -5,20 +5,7 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
-
-use function get_class;
-use function gettype;
-use function in_array;
-use function is_numeric;
-use function is_object;
-use function is_string;
-use function ord;
-use function preg_match;
-use function sprintf;
-use function strlen;
 
 /**
  * Provide security tools around HTTP headers to prevent common injection vectors.
@@ -53,7 +40,7 @@ final class HeaderSecurity
      *
      * @see http://en.wikipedia.org/wiki/HTTP_response_splitting
      */
-    public static function filter(string $value) : string
+    public static function filter($value)
     {
         $value  = (string) $value;
         $length = strlen($value);
@@ -65,7 +52,7 @@ final class HeaderSecurity
             if ($ascii === 13) {
                 $lf = ord($value[$i + 1]);
                 $ws = ord($value[$i + 2]);
-                if ($lf === 10 && in_array($ws, [9, 32], true)) {
+                if ($lf === 10 && in_array($ws, array(9, 32), true)) {
                     $string .= $value[$i] . $value[$i + 1];
                     $i += 1;
                 }
@@ -101,7 +88,7 @@ final class HeaderSecurity
      * @param string|int|float $value
      * @see http://en.wikipedia.org/wiki/HTTP_response_splitting
      */
-    public static function isValid($value) : bool
+    public static function isValid($value)
     {
         $value  = (string) $value;
 

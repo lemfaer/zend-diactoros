@@ -5,12 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\Response;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Diactoros\Response\RedirectResponse;
 use Zend\Diactoros\Uri;
 
@@ -43,7 +41,7 @@ class RedirectResponseTest extends TestCase
 
     public function testConstructorAllowsSpecifyingHeaders()
     {
-        $response = new RedirectResponse('/foo/bar', 302, ['X-Foo' => ['Bar']]);
+        $response = new RedirectResponse('/foo/bar', 302, array('X-Foo' => array('Bar')));
         $this->assertSame(302, $response->getStatusCode());
         $this->assertTrue($response->hasHeader('Location'));
         $this->assertSame('/foo/bar', $response->getHeaderLine('Location'));
@@ -53,17 +51,17 @@ class RedirectResponseTest extends TestCase
 
     public function invalidUris()
     {
-        return [
-            'null'       => [ null ],
-            'false'      => [ false ],
-            'true'       => [ true ],
-            'zero'       => [ 0 ],
-            'int'        => [ 1 ],
-            'zero-float' => [ 0.0 ],
-            'float'      => [ 1.1 ],
-            'array'      => [ [ '/foo/bar' ] ],
-            'object'     => [ (object) [ '/foo/bar' ] ],
-        ];
+        return array(
+            'null'       => array(null),
+            'false'      => array(false),
+            'true'       => array(true),
+            'zero'       => array(0),
+            'int'        => array(1),
+            'zero-float' => array(0.0),
+            'float'      => array(1.1),
+            'array'      => array(array('/foo/bar')),
+            'object'     => array((object) array('/foo/bar')),
+        );
     }
 
     /**
@@ -71,8 +69,7 @@ class RedirectResponseTest extends TestCase
      */
     public function testConstructorRaisesExceptionOnInvalidUri($uri)
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Uri');
+        $this->setExpectedException("InvalidArgumentException", 'Uri');
 
         new RedirectResponse($uri);
     }

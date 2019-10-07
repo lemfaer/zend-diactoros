@@ -5,23 +5,15 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
-
-use function array_key_exists;
-use function strpos;
-use function strtolower;
-use function strtr;
-use function substr;
 
 /**
  * @param array $server Values obtained from the SAPI (generally `$_SERVER`).
  * @return array Header/value pairs
  */
-function marshalHeadersFromSapi(array $server) : array
+function marshalHeadersFromSapi(array $server)
 {
-    $headers = [];
+    $headers = array();
     foreach ($server as $key => $value) {
         // Apache prefixes environment variables with REDIRECT_
         // if they are added by rewrite rules

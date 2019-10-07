@@ -5,12 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionProperty;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\UploadedFile;
@@ -40,7 +38,7 @@ class ServerRequestTest extends TestCase
 
     public function testQueryParamsMutatorReturnsCloneWithChanges()
     {
-        $value = ['foo' => 'bar'];
+        $value = array('foo' => 'bar');
         $request = $this->request->withQueryParams($value);
         $this->assertNotSame($this->request, $request);
         $this->assertSame($value, $request->getQueryParams());
@@ -53,7 +51,7 @@ class ServerRequestTest extends TestCase
 
     public function testCookiesMutatorReturnsCloneWithChanges()
     {
-        $value = ['foo' => 'bar'];
+        $value = array('foo' => 'bar');
         $request = $this->request->withCookieParams($value);
         $this->assertNotSame($this->request, $request);
         $this->assertSame($value, $request->getCookieParams());
@@ -71,7 +69,7 @@ class ServerRequestTest extends TestCase
 
     public function testParsedBodyMutatorReturnsCloneWithChanges()
     {
-        $value = ['foo' => 'bar'];
+        $value = array('foo' => 'bar');
         $request = $this->request->withParsedBody($value);
         $this->assertNotSame($this->request, $request);
         $this->assertSame($value, $request->getParsedBody());
@@ -109,11 +107,11 @@ class ServerRequestTest extends TestCase
 
     public function provideMethods()
     {
-        return [
-            'post' => ['POST', 'POST'],
-            'get'  => ['GET', 'GET'],
-            'null' => [null, 'GET'],
-        ];
+        return array(
+            'post' => array('POST', 'POST'),
+            'get'  => array('GET', 'GET'),
+            'null' => array(null, 'GET'),
+        );
     }
 
     /**
@@ -121,27 +119,27 @@ class ServerRequestTest extends TestCase
      */
     public function testUsesProvidedConstructorArguments($parameterMethod, $methodReturned)
     {
-        $server = [
+        $server = array(
             'foo' => 'bar',
             'baz' => 'bat',
-        ];
+        );
 
         $server['server'] = true;
 
-        $files = [
+        $files = array(
             'files' => new UploadedFile('php://temp', 0, 0),
-        ];
+        );
 
         $uri = new Uri('http://example.com');
-        $headers = [
-            'host' => ['example.com'],
-        ];
-        $cookies = [
+        $headers = array(
+            'host' => array('example.com'),
+        );
+        $cookies = array(
             'boo' => 'foo',
-        ];
-        $queryParams = [
+        );
+        $queryParams = array(
             'bar' => 'bat',
-        ];
+        );
         $parsedBody = 'bazbar';
         $protocol = '1.2';
 
@@ -210,35 +208,35 @@ class ServerRequestTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withAttribute('boo', null);
         $request = $request->withoutAttribute('boo');
-        $this->assertSame([], $request->getAttributes());
+        $this->assertSame(array(), $request->getAttributes());
     }
 
     public function testAllowsRemovingNonExistentAttribute()
     {
         $request = new ServerRequest();
         $request = $request->withoutAttribute('boo');
-        $this->assertSame([], $request->getAttributes());
+        $this->assertSame(array(), $request->getAttributes());
     }
 
     public function testTryToAddInvalidUploadedFiles()
     {
         $request = new ServerRequest();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
-        $request->withUploadedFiles([null]);
+        $request->withUploadedFiles(array(null));
     }
 
     public function testNestedUploadedFiles()
     {
         $request = new ServerRequest();
 
-        $uploadedFiles = [
-            [
+        $uploadedFiles = array(
+            array(
                 new UploadedFile('php://temp', 0, 0),
                 new UploadedFile('php://temp', 0, 0),
-            ]
-        ];
+            )
+        );
 
         $request = $request->withUploadedFiles($uploadedFiles);
 

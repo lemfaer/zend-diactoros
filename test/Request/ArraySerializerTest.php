@@ -5,11 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\Request;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use UnexpectedValueException;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Request\ArraySerializer;
@@ -23,7 +21,8 @@ class ArraySerializerTest extends TestCase
         $stream = new Stream('php://memory', 'wb+');
         $stream->write('{"test":"value"}');
 
-        $request = (new Request())
+        $request = new Request();
+        $request = $request
             ->withMethod('POST')
             ->withUri(new Uri('http://example.com/foo/bar?baz=bat'))
             ->withAddedHeader('Accept', 'application/json')
@@ -33,55 +32,56 @@ class ArraySerializerTest extends TestCase
 
         $message = ArraySerializer::toArray($request);
 
-        $this->assertSame([
+        $this->assertSame(array(
             'method' => 'POST',
             'request_target' => '/foo/bar?baz=bat',
             'uri' => 'http://example.com/foo/bar?baz=bat',
             'protocol_version' => '1.1',
-            'headers' => [
-                'Host' => [
+            'headers' => array(
+                'Host' => array(
                     'example.com',
-                ],
-                'Accept' => [
+                ),
+                'Accept' => array(
                     'application/json',
-                ],
-                'X-Foo-Bar' => [
+                ),
+                'X-Foo-Bar' => array(
                     'Baz',
                     'Bat'
-                ],
-            ],
+                ),
+            ),
             'body' => '{"test":"value"}',
-        ], $message);
+        ), $message);
     }
 
     public function testDeserializeFromArray()
     {
-        $serializedRequest = [
+        $serializedRequest = array(
             'method' => 'POST',
             'request_target' => '/foo/bar?baz=bat',
             'uri' => 'http://example.com/foo/bar?baz=bat',
             'protocol_version' => '1.1',
-            'headers' => [
-                'Host' => [
+            'headers' => array(
+                'Host' => array(
                     'example.com',
-                ],
-                'Accept' => [
+                ),
+                'Accept' => array(
                     'application/json',
-                ],
-                'X-Foo-Bar' => [
+                ),
+                'X-Foo-Bar' => array(
                     'Baz',
                     'Bat'
-                ],
-            ],
+                ),
+            ),
             'body' => '{"test":"value"}',
-        ];
+        );
 
         $message = ArraySerializer::fromArray($serializedRequest);
 
         $stream = new Stream('php://memory', 'wb+');
         $stream->write('{"test":"value"}');
 
-        $request = (new Request())
+        $request = new Request();
+        $request = $request
             ->withMethod('POST')
             ->withUri(new Uri('http://example.com/foo/bar?baz=bat'))
             ->withAddedHeader('Accept', 'application/json')
@@ -94,26 +94,26 @@ class ArraySerializerTest extends TestCase
 
     public function testMissingBodyParamInSerializedRequestThrowsException()
     {
-        $serializedRequest = [
+        $serializedRequest = array(
             'method' => 'POST',
             'request_target' => '/foo/bar?baz=bat',
             'uri' => 'http://example.com/foo/bar?baz=bat',
             'protocol_version' => '1.1',
-            'headers' => [
-                'Host' => [
+            'headers' => array(
+                'Host' => array(
                     'example.com',
-                ],
-                'Accept' => [
+                ),
+                'Accept' => array(
                     'application/json',
-                ],
-                'X-Foo-Bar' => [
+                ),
+                'X-Foo-Bar' => array(
                     'Baz',
                     'Bat'
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
 
-        $this->expectException(UnexpectedValueException::class);
+        $this->setExpectedException("UnexpectedValueException");
 
         ArraySerializer::fromArray($serializedRequest);
     }

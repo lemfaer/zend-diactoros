@@ -5,19 +5,17 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Exception;
 
 use RuntimeException;
-use Throwable;
+use Exception;
 
 class UploadedFileAlreadyMovedException extends RuntimeException implements ExceptionInterface
 {
     public function __construct(
-        string $message = 'Cannot retrieve stream after it has already moved',
+        $message = 'Cannot retrieve stream after it has already moved',
         $code = 0,
-        Throwable $previous = null
+        Exception $previous = null
     ) {
         parent::__construct($message, $code, $previous);
     }

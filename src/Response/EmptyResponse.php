@@ -5,8 +5,6 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Response;
 
 use Zend\Diactoros\Response;
@@ -23,7 +21,7 @@ class EmptyResponse extends Response
      * @param int $status Status code for the response, if any.
      * @param array $headers Headers for the response, if any.
      */
-    public function __construct(int $status = 204, array $headers = [])
+    public function __construct($status = 204, array $headers = array())
     {
         $body = new Stream('php://temp', 'r');
         parent::__construct($body, $status, $headers);
@@ -35,7 +33,7 @@ class EmptyResponse extends Response
      * @param array $headers Headers for the response.
      * @return EmptyResponse
      */
-    public static function withHeaders(array $headers) : EmptyResponse
+    public static function withHeaders(array $headers)
     {
         return new static(204, $headers);
     }

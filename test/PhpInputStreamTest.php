@@ -5,15 +5,10 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Diactoros\PhpInputStream;
-
-use function file_get_contents;
-use function substr;
 
 class PhpInputStreamTest extends TestCase
 {

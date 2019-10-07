@@ -5,37 +5,13 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionProperty;
 use RuntimeException;
 use Zend\Diactoros\Stream;
-
-use function curl_init;
-use function feof;
-use function file_exists;
-use function file_put_contents;
-use function fopen;
-use function fread;
-use function fseek;
-use function fstat;
-use function ftok;
-use function function_exists;
-use function fwrite;
-use function imagecreate;
-use function is_resource;
-use function shmop_open;
-use function stream_get_meta_data;
-use function sys_get_temp_dir;
-use function tempnam;
-use function uniqid;
-use function unlink;
-
-use const DIRECTORY_SEPARATOR;
 
 class StreamTest extends TestCase
 {
@@ -61,14 +37,14 @@ class StreamTest extends TestCase
 
     public function testCanInstantiateWithStreamIdentifier()
     {
-        $this->assertInstanceOf(Stream::class, $this->stream);
+        $this->assertInstanceOf("Zend\Diactoros\Stream", $this->stream);
     }
 
     public function testCanInstantiteWithStreamResource()
     {
         $resource = fopen('php://memory', 'wb+');
         $stream   = new Stream($resource);
-        $this->assertInstanceOf(Stream::class, $stream);
+        $this->assertInstanceOf("Zend\Diactoros\Stream", $stream);
     }
 
     public function testIsReadableReturnsFalseIfStreamIsNotReadable()
@@ -100,9 +76,9 @@ class StreamTest extends TestCase
 
     public function testPassingInvalidStreamResourceToConstructorRaisesException()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
-        $stream = new Stream(['  THIS WILL NOT WORK  ']);
+        $stream = new Stream(array('  THIS WILL NOT WORK  '));
     }
 
     public function testStringSerializationReturnsEmptyStringWhenStreamIsNotReadable()
@@ -176,8 +152,7 @@ class StreamTest extends TestCase
         fseek($resource, 2);
         $stream->detach();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No resource');
+        $this->setExpectedException("RuntimeException", 'No resource');
 
         $stream->tell();
     }
@@ -266,8 +241,7 @@ class StreamTest extends TestCase
         $stream = new Stream($resource);
         $stream->detach();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No resource');
+        $this->setExpectedException("RuntimeException", 'No resource');
 
         $stream->seek(2);
     }
@@ -290,35 +264,35 @@ class StreamTest extends TestCase
 
     public function provideDataForIsWritable()
     {
-        return [
-            ['a',   true,  true],
-            ['a+',  true,  true],
-            ['a+b', true,  true],
-            ['ab',  true,  true],
-            ['c',   true,  true],
-            ['c+',  true,  true],
-            ['c+b', true,  true],
-            ['cb',  true,  true],
-            ['r',   true,  false],
-            ['r+',  true,  true],
-            ['r+b', true,  true],
-            ['rb',  true,  false],
-            ['rw',  true,  true],
-            ['w',   true,  true],
-            ['w+',  true,  true],
-            ['w+b', true,  true],
-            ['wb',  true,  true],
-            ['x',   false, true],
-            ['x+',  false, true],
-            ['x+b', false, true],
-            ['xb',  false, true],
-        ];
+        return array(
+            array('a',   true,  true),
+            array('a+',  true,  true),
+            array('a+b', true,  true),
+            array('ab',  true,  true),
+            array('c',   true,  true),
+            array('c+',  true,  true),
+            array('c+b', true,  true),
+            array('cb',  true,  true),
+            array('r',   true,  false),
+            array('r+',  true,  true),
+            array('r+b', true,  true),
+            array('rb',  true,  false),
+            array('rw',  true,  true),
+            array('w',   true,  true),
+            array('w+',  true,  true),
+            array('w+b', true,  true),
+            array('wb',  true,  true),
+            array('x',   false, true),
+            array('x+',  false, true),
+            array('x+b', false, true),
+            array('xb',  false, true),
+        );
     }
 
     private function findNonExistentTempName()
     {
         while (true) {
-            $tmpnam = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'diac' . uniqid();
+            $tmpnam = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . 'diac' . uniqid();
             if (! file_exists(sys_get_temp_dir() . $tmpnam)) {
                 break;
             }
@@ -345,29 +319,29 @@ class StreamTest extends TestCase
 
     public function provideDataForIsReadable()
     {
-        return [
-            ['a',   true,  false],
-            ['a+',  true,  true],
-            ['a+b', true,  true],
-            ['ab',  true,  false],
-            ['c',   true,  false],
-            ['c+',  true,  true],
-            ['c+b', true,  true],
-            ['cb',  true,  false],
-            ['r',   true,  true],
-            ['r+',  true,  true],
-            ['r+b', true,  true],
-            ['rb',  true,  true],
-            ['rw',  true,  true],
-            ['w',   true,  false],
-            ['w+',  true,  true],
-            ['w+b', true,  true],
-            ['wb',  true,  false],
-            ['x',   false, false],
-            ['x+',  false, true],
-            ['x+b', false, true],
-            ['xb',  false, false],
-        ];
+        return array(
+            array('a',   true,  false),
+            array('a+',  true,  true),
+            array('a+b', true,  true),
+            array('ab',  true,  false),
+            array('c',   true,  false),
+            array('c+',  true,  true),
+            array('c+b', true,  true),
+            array('cb',  true,  false),
+            array('r',   true,  true),
+            array('r+',  true,  true),
+            array('r+b', true,  true),
+            array('rb',  true,  true),
+            array('rw',  true,  true),
+            array('w',   true,  false),
+            array('w+',  true,  true),
+            array('w+b', true,  true),
+            array('wb',  true,  false),
+            array('x',   false, false),
+            array('x+',  false, true),
+            array('x+b', false, true),
+            array('xb',  false, false),
+        );
     }
 
     /**
@@ -395,8 +369,7 @@ class StreamTest extends TestCase
         $stream = new Stream($resource);
         $stream->detach();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No resource');
+        $this->setExpectedException("RuntimeException", 'No resource');
 
         $stream->write('bar');
     }
@@ -405,8 +378,7 @@ class StreamTest extends TestCase
     {
         $stream = new Stream('php://memory', 'r');
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Stream is not writable');
+        $this->setExpectedException("RuntimeException", 'Stream is not writable');
 
         $stream->write('bar');
     }
@@ -430,8 +402,7 @@ class StreamTest extends TestCase
         $stream = new Stream($resource);
         $stream->detach();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No resource');
+        $this->setExpectedException("RuntimeException", 'No resource');
 
         $stream->read(4096);
     }
@@ -455,7 +426,7 @@ class StreamTest extends TestCase
         $resource = fopen($this->tmpnam, 'w');
         $stream = new Stream($resource);
 
-        $this->expectException(RuntimeException::class);
+        $this->setExpectedException("RuntimeException");
 
         $stream->getContents();
     }
@@ -463,16 +434,16 @@ class StreamTest extends TestCase
     public function invalidResources()
     {
         $this->tmpnam = tempnam(sys_get_temp_dir(), 'diac');
-        return [
-            'null' => [ null ],
-            'false' => [ false ],
-            'true' => [ true ],
-            'int' => [ 1 ],
-            'float' => [ 1.1 ],
-            'string-non-resource' => [ 'foo-bar-baz' ],
-            'array' => [ [ fopen($this->tmpnam, 'r+') ] ],
-            'object' => [ (object) [ 'resource' => fopen($this->tmpnam, 'r+') ] ],
-        ];
+        return array(
+            'null' => array(null),
+            'false' => array(false),
+            'true' => array(true),
+            'int' => array(1),
+            'float' => array(1.1),
+            'string-non-resource' => array('foo-bar-baz'),
+            'array' => array(array(fopen($this->tmpnam, 'r+'))),
+            'object' => array((object) array('resource' => fopen($this->tmpnam, 'r+'))),
+        );
     }
 
     /**
@@ -480,8 +451,7 @@ class StreamTest extends TestCase
      */
     public function testAttachWithNonStringNonResourceRaisesException($resource)
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid stream');
+        $this->setExpectedException("InvalidArgumentException", 'Invalid stream');
 
         $this->stream->attach($resource);
     }
@@ -595,8 +565,7 @@ class StreamTest extends TestCase
             $this->markTestSkipped('No acceptable resource available to test ' . __METHOD__);
         }
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('stream');
+        $this->setExpectedException("InvalidArgumentException", 'stream');
 
         new Stream($resource);
     }
@@ -613,8 +582,7 @@ class StreamTest extends TestCase
 
         $stream = new Stream(__FILE__);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('stream');
+        $this->setExpectedException("InvalidArgumentException", 'stream');
 
         $stream->attach($resource);
     }
@@ -646,9 +614,9 @@ class StreamTest extends TestCase
         file_put_contents($this->tmpnam, 'FOO BAR');
         $resource = fopen($this->tmpnam, 'r');
         $stream = $this
-            ->getMockBuilder(Stream::class)
-            ->setConstructorArgs([$resource])
-            ->setMethods(['isSeekable'])
+            ->getMockBuilder("Zend\Diactoros\Stream")
+            ->setConstructorArgs(array($resource))
+            ->setMethods(array('isSeekable'))
             ->getMock();
 
         $stream->expects($this->any())->method('isSeekable')

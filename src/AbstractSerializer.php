@@ -5,19 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\StreamInterface;
-
-use function array_pop;
-use function implode;
-use function ltrim;
-use function preg_match;
-use function sprintf;
-use function str_replace;
-use function ucwords;
 
 /**
  * Provides base functionality for request and response de/serialization
@@ -39,7 +29,7 @@ abstract class AbstractSerializer
      * @throws Exception\DeserializationException if the sequence contains a CR
      *     or LF in isolation, or ends in a CR.
      */
-    protected static function getLine(StreamInterface $stream) : string
+    protected static function getLine(StreamInterface $stream)
     {
         $line    = '';
         $crFound = false;
@@ -89,16 +79,16 @@ abstract class AbstractSerializer
      *
      * @throws Exception\DeserializationException For invalid headers.
      */
-    protected static function splitStream(StreamInterface $stream) : array
+    protected static function splitStream(StreamInterface $stream)
     {
-        $headers       = [];
+        $headers       = array();
         $currentHeader = false;
 
         while ($line = self::getLine($stream)) {
             if (preg_match(';^(?P<name>[!#$%&\'*+.^_`\|~0-9a-zA-Z-]+):(?P<value>.*)$;', $line, $matches)) {
                 $currentHeader = $matches['name'];
                 if (! isset($headers[$currentHeader])) {
-                    $headers[$currentHeader] = [];
+                    $headers[$currentHeader] = array();
                 }
                 $headers[$currentHeader][] = ltrim($matches['value']);
                 continue;
@@ -118,15 +108,15 @@ abstract class AbstractSerializer
         }
 
         // use RelativeStream to avoid copying initial stream into memory
-        return [$headers, new RelativeStream($stream, $stream->tell())];
+        return array($headers, new RelativeStream($stream, $stream->tell()));
     }
 
     /**
      * Serialize headers to string values.
      */
-    protected static function serializeHeaders(array $headers) : string
+    protected static function serializeHeaders(array $headers)
     {
-        $lines = [];
+        $lines = array();
         foreach ($headers as $header => $values) {
             $normalized = self::filterHeader($header);
             foreach ($values as $value) {
@@ -140,7 +130,7 @@ abstract class AbstractSerializer
     /**
      * Filter a header name to wordcase
      */
-    protected static function filterHeader($header) : string
+    protected static function filterHeader($header)
     {
         $filtered = str_replace('-', ' ', $header);
         $filtered = ucwords($filtered);

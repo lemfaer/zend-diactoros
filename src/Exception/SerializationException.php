@@ -5,20 +5,18 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros\Exception;
 
 use UnexpectedValueException;
 
 class SerializationException extends UnexpectedValueException implements ExceptionInterface
 {
-    public static function forInvalidRequestLine() : self
+    public static function forInvalidRequestLine()
     {
         return new self('Invalid request line detected');
     }
 
-    public static function forInvalidStatusLine() : self
+    public static function forInvalidStatusLine()
     {
         return new self('No status line detected');
     }

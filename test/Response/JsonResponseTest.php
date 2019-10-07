@@ -5,37 +5,23 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace ZendTest\Diactoros\Response;
 
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Diactoros\Response\JsonResponse;
-
-use function fopen;
-use function json_decode;
-use function json_encode;
-use function sprintf;
-
-use const JSON_HEX_AMP;
-use const JSON_HEX_APOS;
-use const JSON_HEX_QUOT;
-use const JSON_HEX_TAG;
-use const JSON_PRETTY_PRINT;
-use const JSON_UNESCAPED_SLASHES;
 
 class JsonResponseTest extends TestCase
 {
     public function testConstructorAcceptsDataAndCreatesJsonEncodedMessageBody()
     {
-        $data = [
-            'nested' => [
-                'json' => [
+        $data = array(
+            'nested' => array(
+                'json' => array(
                     'tree',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
         $json = '{"nested":{"json":["tree"]}}';
 
         $response = new JsonResponse($data);
@@ -46,17 +32,17 @@ class JsonResponseTest extends TestCase
 
     public function scalarValuesForJSON()
     {
-        return [
-            'null'         => [null],
-            'false'        => [false],
-            'true'         => [true],
-            'zero'         => [0],
-            'int'          => [1],
-            'zero-float'   => [0.0],
-            'float'        => [1.1],
-            'empty-string' => [''],
-            'string'       => ['string'],
-        ];
+        return array(
+            'null'         => array(null),
+            'false'        => array(false),
+            'true'         => array(true),
+            'zero'         => array(0),
+            'int'          => array(1),
+            'zero-float'   => array(0.0),
+            'float'        => array(1.1),
+            'empty-string' => array(''),
+            'string'       => array('string'),
+        );
     }
 
     /**
@@ -79,7 +65,7 @@ class JsonResponseTest extends TestCase
 
     public function testCanProvideAlternateContentTypeViaHeadersPassedToConstructor()
     {
-        $response = new JsonResponse(null, 200, ['content-type' => 'foo/json']);
+        $response = new JsonResponse(null, 200, array('content-type' => 'foo/json'));
         $this->assertSame('foo/json', $response->getHeaderLine('content-type'));
     }
 
@@ -88,7 +74,7 @@ class JsonResponseTest extends TestCase
         // Serializing something that is not serializable.
         $resource = fopen('php://memory', 'r');
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException("InvalidArgumentException");
 
         new JsonResponse($resource);
     }
@@ -96,23 +82,22 @@ class JsonResponseTest extends TestCase
     public function testJsonErrorHandlingOfBadEmbeddedData()
     {
         // Serializing something that is not serializable.
-        $data = [
+        $data = array(
             'stream' => fopen('php://memory', 'r'),
-        ];
+        );
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to encode');
+        $this->setExpectedException("InvalidArgumentException", 'Unable to encode');
 
         new JsonResponse($data);
     }
 
     public function valuesToJsonEncode()
     {
-        return [
-            'uri'    => ['https://example.com/foo?bar=baz&baz=bat', 'uri'],
-            'html'   => ['<p class="test">content</p>', 'html'],
-            'string' => ["Don't quote!", 'string'],
-        ];
+        return array(
+            'uri'    => array('https://example.com/foo?bar=baz&baz=bat', 'uri'),
+            'html'   => array('<p class="test">content</p>', 'html'),
+            'string' => array("Don't quote!", 'string'),
+        );
     }
 
     /**
@@ -120,13 +105,14 @@ class JsonResponseTest extends TestCase
      */
     public function testUsesSaneDefaultJsonEncodingFlags($value, $key)
     {
-        $defaultFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES;
+        $defaultFlags = \JSON_HEX_TAG | \JSON_HEX_APOS | \JSON_HEX_QUOT | \JSON_HEX_AMP;
 
-        $response = new JsonResponse([$key => $value]);
+        $response = new JsonResponse(array($key => $value));
         $stream   = $response->getBody();
         $contents = (string) $stream;
 
         $expected = json_encode($value, $defaultFlags);
+
         $this->assertContains(
             $expected,
             $contents,
@@ -136,7 +122,7 @@ class JsonResponseTest extends TestCase
 
     public function testConstructorRewindsBodyStream()
     {
-        $json = ['test' => 'data'];
+        $json = array('test' => 'data');
         $response = new JsonResponse($json);
 
         $actual = json_decode($response->getBody()->getContents(), true);
@@ -145,15 +131,15 @@ class JsonResponseTest extends TestCase
 
     public function testPayloadGetter()
     {
-        $payload = ['test' => 'data'];
+        $payload = array('test' => 'data');
         $response = new JsonResponse($payload);
         $this->assertSame($payload, $response->getPayload());
     }
 
     public function testWithPayload()
     {
-        $response = new JsonResponse(['test' => 'data']);
-        $json = [ 'foo' => 'bar'];
+        $response = new JsonResponse(array('test' => 'data'));
+        $json = array('foo' => 'bar');
         $newResponse = $response->withPayload($json);
         $this->assertNotSame($response, $newResponse);
 
@@ -164,27 +150,25 @@ class JsonResponseTest extends TestCase
 
     public function testEncodingOptionsGetter()
     {
-        $response = new JsonResponse([]);
-        $this->assertSame(JsonResponse::DEFAULT_JSON_FLAGS, $response->getEncodingOptions());
+        $response = new JsonResponse(array());
+        $this->assertSame(\Zend\Diactoros\Response\DEFAULT_JSON_FLAGS, $response->getEncodingOptions());
     }
 
     public function testWithEncodingOptions()
     {
-        $response = new JsonResponse([ 'foo' => 'bar']);
+        $response = new JsonResponse(array('foo' => '"bar'));
         $expected = <<<JSON
-{"foo":"bar"}
+{"foo":"\u0022bar"}
 JSON;
 
         $this->assertSame($expected, $response->getBody()->getContents());
 
-        $newResponse = $response->withEncodingOptions(JSON_PRETTY_PRINT);
+        $newResponse = $response->withEncodingOptions(0);
 
         $this->assertNotSame($response, $newResponse);
 
         $expected = <<<JSON
-{
-    "foo": "bar"
-}
+{"foo":"\"bar"}
 JSON;
 
         $this->assertSame($expected, $newResponse->getBody()->getContents());

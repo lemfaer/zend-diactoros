@@ -5,15 +5,11 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types=1);
-
 namespace Zend\Diactoros;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-
-use function strtolower;
 
 /**
  * HTTP Request encapsulation
@@ -22,10 +18,8 @@ use function strtolower;
  * implemented such that they retain the internal state of the current
  * message and return a new instance that contains the changed state.
  */
-class Request implements RequestInterface
+class Request extends RequestTrait implements RequestInterface
 {
-    use RequestTrait;
-
     /**
      * @param null|string|UriInterface $uri URI for the request, if any.
      * @param null|string $method HTTP method for the request, if any.
@@ -33,7 +27,7 @@ class Request implements RequestInterface
      * @param array $headers Headers for the message, if any.
      * @throws Exception\InvalidArgumentException for any invalid value.
      */
-    public function __construct($uri = null, string $method = null, $body = 'php://temp', array $headers = [])
+    public function __construct($uri = null, $method = null, $body = 'php://temp', array $headers = array())
     {
         $this->initialize($uri, $method, $body, $headers);
     }
@@ -41,13 +35,13 @@ class Request implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getHeaders() : array
+    public function getHeaders()
     {
         $headers = $this->headers;
         if (! $this->hasHeader('host')
             && $this->uri->getHost()
         ) {
-            $headers['Host'] = [$this->getHostFromUri()];
+            $headers['Host'] = array($this->getHostFromUri());
         }
 
         return $headers;
@@ -56,16 +50,16 @@ class Request implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getHeader($header) : array
+    public function getHeader($header)
     {
         if (! $this->hasHeader($header)) {
             if (strtolower($header) === 'host'
                 && $this->uri->getHost()
             ) {
-                return [$this->getHostFromUri()];
+                return array($this->getHostFromUri());
             }
 
-            return [];
+            return array();
         }
 
         $header = $this->headerNames[strtolower($header)];

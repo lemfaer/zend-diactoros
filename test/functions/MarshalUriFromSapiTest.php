@@ -5,12 +5,9 @@
  * @license   https://github.com/zendframework/zend-diactoros/blob/master/LICENSE.md New BSD License
  */
 
-declare(strict_types = 1);
-
 namespace ZendTest\Diactoros\functions;
 
-use PHPUnit\Framework\TestCase;
-use function Zend\Diactoros\marshalUriFromSapi;
+use PHPUnit_Framework_TestCase as TestCase;
 
 class MarshalUriFromSapiTest extends TestCase
 {
@@ -19,9 +16,9 @@ class MarshalUriFromSapiTest extends TestCase
      * @param string $expectedScheme
      * @dataProvider returnsUrlWithCorrectHttpSchemeFromArraysProvider
      */
-    public function testReturnsUrlWithCorrectHttpSchemeFromArrays(string $httpsValue, string $expectedScheme) : void
+    public function testReturnsUrlWithCorrectHttpSchemeFromArrays($httpsValue, $expectedScheme)
     {
-        $server = [
+        $server = array(
             'HTTPS' => $httpsValue,
             'SERVER_NAME' => 'localhost',
             'SERVER_PORT' => '80',
@@ -44,9 +41,9 @@ class MarshalUriFromSapiTest extends TestCase
             'SCRIPT_FILENAME' => '/var/www/public/index.php',
             'FCGI_ROLE' => 'RESPONDER',
             'PHP_SELF' => '/index.php',
-        ];
+        );
 
-        $headers = [
+        $headers = array(
             'HTTP_COOKIE' => '',
             'HTTP_ACCEPT_LANGUAGE' => 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
             'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br',
@@ -56,22 +53,22 @@ class MarshalUriFromSapiTest extends TestCase
             'HTTP_ACCEPT' => 'application/json,*/*',
             'HTTP_CONNECTION' => 'keep-alive',
             'HTTP_HOST' => 'localhost:8080',
-        ];
+        );
 
-        $url = marshalUriFromSapi($server, $headers);
+        $url = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
 
         self::assertSame($expectedScheme, $url->getScheme());
     }
 
-    public function returnsUrlWithCorrectHttpSchemeFromArraysProvider() : array
+    public function returnsUrlWithCorrectHttpSchemeFromArraysProvider()
     {
-        return [
-            'on-lowercase' => ['on', 'https'],
-            'on-uppercase' => ['ON', 'https'],
-            'off-lowercase' => ['off', 'http'],
-            'off-mixed-case' => ['oFf', 'http'],
-            'neither-on-nor-off' => ['foo', 'http'],
-            'empty' => ['', 'http'],
-        ];
+        return array(
+            'on-lowercase' => array('on', 'https'),
+            'on-uppercase' => array('ON', 'https'),
+            'off-lowercase' => array('off', 'http'),
+            'off-mixed-case' => array('oFf', 'http'),
+            'neither-on-nor-off' => array('foo', 'http'),
+            'empty' => array('', 'http'),
+        );
     }
 }
