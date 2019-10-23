@@ -2,6 +2,8 @@
 
 namespace Zend\Http\Message;
 
+use Psr\Http\Message\StreamInterface;
+
 interface UploadedFileFactoryInterface
 {
     /**
